@@ -26,4 +26,5 @@ build
 bannertool*
 makerom*
 venv
-out
+out/*
+in/*
