@@ -106,11 +106,11 @@ class Game(object):
         shutil.rmtree(f"./temp")
 
 def check_requirements():
-    if not os.path.exists("./3dstool.exe"):
+    if not os.path.exists("./tools/3dstool.exe"):
         print("ERROR: 3dstool.exe is missing")
-    if not os.path.exists("./ctrtool.exe"):
+    if not os.path.exists("./tools/ctrtool.exe"):
         print("ERROR: ctrtool.exe is missing!")
-    if not os.path.exists("./makerom.exe"):
+    if not os.path.exists("./tools/makerom.exe"):
         print("ERROR: makerom.exe is missing!")
 
 def get_cias() -> list:

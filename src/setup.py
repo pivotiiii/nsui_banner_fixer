@@ -2,8 +2,9 @@
 
 app_name = "nsui_banner_fixer"
 description = "YANBF Generator"
-version = "1.0.0"
+version = "1.1"
 imports = ["os", "subprocess", "argparse", "shutil"]
+bdir = "../dist/nsui_banner_fixer"
 
 ############################################################################################
 
@@ -31,7 +32,7 @@ excludes = [i for i in AllPackage() if notFound(BasicPackages,i)] + man_excludes
 build_exe_options = {
     "includes": BasicPackages,
     "excludes": excludes,
-    "build_exe": "../dist"}
+    "build_exe": bdir}
 
 
 # Dependencies are automatically detected, but it might need fine tuning.
@@ -52,10 +53,17 @@ setup(
     executables=[Executable(script = "main.py", target_name = "nsui_banner_fixer.exe", base = base)],
 )
 
-os.mkdir("../dist/tools")
-shutil.copy2("./tools/ctrtool.exe", "../dist/tools")
-shutil.copy2("./tools/3dstool.exe", "../dist/tools")
-shutil.copy2("./tools/makerom.exe", "../dist/tools")
+os.mkdir(f"{bdir}/tools")
+shutil.copy2("./tools/ctrtool.exe", f"{bdir}/tools")
+shutil.copy2("./tools/3dstool.exe", f"{bdir}/tools")
+shutil.copy2("./tools/makerom.exe", f"{bdir}/tools")
 
-shutil.copy2("./tools/3dstool_license.txt", "../dist/tools")
-shutil.copy2("../dist/frozen_application_license.txt", "../dist/tools")
+shutil.copy2("./tools/3dstool_license.txt", f"{bdir}/tools")
+os.rename(f"{bdir}/frozen_application_license.txt", f"{bdir}/tools/frozen_application_license.txt")
+
+if os.path.exists(f"{bdir}.{version}.zip"):
+    inp = input("please increase version or type y to overwrite: ")
+    if inp != "y":
+        print("did not create a zip file")
+        exit()
+shutil.make_archive(f"{bdir}.{version}", 'zip', f"{bdir}")
