@@ -20,6 +20,7 @@
 *.lz
 *.icn
 *0000000
+*license.txt
 __pycache__
 dist
 build

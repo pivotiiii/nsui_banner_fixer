@@ -35,23 +35,23 @@ class Game(object):
     def extract_cia(self):
         os.mkdir(f"./{self.cwd}")
         if verbose:
-            subprocess.run(["ctrtool", f"--contents={self.cwd}/contents", f"{self.name}.cia"])
+            subprocess.run(["tools/ctrtool", f"--contents={self.cwd}/contents", f"{self.name}.cia"])
         else:
-            subprocess.run(["ctrtool", f"--contents={self.cwd}/contents", f"{self.name}.cia"], stdout=subprocess.DEVNULL)
+            subprocess.run(["tools/ctrtool", f"--contents={self.cwd}/contents", f"{self.name}.cia"], stdout=subprocess.DEVNULL)
         
         subprocess.run([
-            "3dstool", f"-x{self.v}", "-t", "cxi", "-f", f"{self.cwd}/contents.0000.00000000",
+            "tools/3dstool", f"-x{self.v}", "-t", "cxi", "-f", f"{self.cwd}/contents.0000.00000000",
             "--header", f"{self.cwd}/ncch.header",
             "--exh", f"{self.cwd}/exheader.bin",
             "--exefs", f"{self.cwd}/exefs.bin",
             "--romfs", f"{self.cwd}/romfs.bin"])
 
-        subprocess.run(["3dstool", f"-x{self.v}", "-t", "exefs", "-f", f"{self.cwd}/exefs.bin", "--header", f"{self.cwd}/exefs.header", "--exefs-dir", f"{self.cwd}/exefs"])
+        subprocess.run(["tools/3dstool", f"-x{self.v}", "-t", "exefs", "-f", f"{self.cwd}/exefs.bin", "--header", f"{self.cwd}/exefs.header", "--exefs-dir", f"{self.cwd}/exefs"])
         
         os.mkdir(f"./{self.cwd}/banner")
         if os.path.exists(f"./{self.cwd}/exefs/banner.bnr"):
             self.banner_ext = "bnr"
-        subprocess.run(["3dstool", f"-x{self.v}", "-t", "banner", "-f", f"{self.cwd}/exefs/banner.{self.banner_ext}", "--banner-dir", f"{self.cwd}/banner"])
+        subprocess.run(["tools/3dstool", f"-x{self.v}", "-t", "banner", "-f", f"{self.cwd}/exefs/banner.{self.banner_ext}", "--banner-dir", f"{self.cwd}/banner"])
 
     def edit_bcmdl(self):
         for i in range(1, 14):
@@ -82,18 +82,18 @@ class Game(object):
     def repack_cia(self):
         os.remove(f"./{self.cwd}/exefs/banner.{self.banner_ext}")
         subprocess.run([
-            "3dstool", f"-c{self.v}", "-t", "banner", 
+            "tools/3dstool", f"-c{self.v}", "-t", "banner", 
             "-f", f"{self.cwd}/exefs/banner.{self.banner_ext}", 
             "--banner-dir", f"{self.cwd}/banner"])
 
         subprocess.run([
-            "3dstool", f"-c{self.v}", "-t", "exefs",
+            "tools/3dstool", f"-c{self.v}", "-t", "exefs",
             "-f", f"{self.cwd}/exefs.bin",
             "--header", f"{self.cwd}/exefs.header",
             "--exefs-dir", f"{self.cwd}/exefs"])
         
         subprocess.run([
-            "3dstool", f"-c{self.v}", "-t", "cxi", 
+            "tools/3dstool", f"-c{self.v}", "-t", "cxi", 
             "-f", f"{self.cwd}/{self.name}.cxi", 
             "--header", f"{self.cwd}/ncch.header", 
             "--exh", f"{self.cwd}/exheader.bin",
@@ -102,7 +102,7 @@ class Game(object):
         
         if not os.path.exists("./out"):
             os.mkdir("./out")
-        subprocess.run(["makerom", "-f", "cia", "-o", f"out/{self.name}.cia", "-content", f"{self.cwd}/{self.name}.cxi:0:0x00"])
+        subprocess.run(["tools/makerom", "-f", "cia", "-o", f"out/{self.name}.cia", "-content", f"{self.cwd}/{self.name}.cxi:0:0x00"])
         shutil.rmtree(f"./temp")
 
 def check_requirements():
