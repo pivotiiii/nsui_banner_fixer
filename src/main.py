@@ -120,6 +120,16 @@ def clean_dirs():
     if os.path.exists(f"./temp"):
             shutil.rmtree(f"./temp")
 
+def finish():
+    env = os.environ()
+    prompter = "PROMPT" in env
+    browser = False
+    for key in env:
+        if key.startswith("FPS_BROWSER_"):
+            browser = True
+    if browser and not prompter:
+        input("Press any key to finish.")
+
 
 if __name__ == "__main__":
     check_requirements()
@@ -137,9 +147,11 @@ if __name__ == "__main__":
         cia = args.input[0]
         if not cia.endswith(".cia"):
             print("ERROR: did you pass a .cia file?")
+            finish()
             exit()
         if not os.path.exists(cia):
             print("ERROR: could not find .cia file")
+            finish()
             exit()
         files = [cia]
     else:
@@ -159,3 +171,4 @@ if __name__ == "__main__":
         print(f"--- done --> saved at out/{name}.cia")
     print("\nWARNING! Overwriting an injected GBA game will overwrite its save file.")
     print("Consider backing up your saves before, e.g. with GBAVCSM (https://github.com/TurdPooCharger/GBAVCSM)")
+    finish()
