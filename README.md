@@ -7,12 +7,16 @@ Consider backing up your saves before, e.g. with [GBAVCSM](https://github.com/Tu
 
 # Usage
 
-Either run the included `nsui_banner_fixer.exe` through the command line:
+Command line:
 
-`nsui_banner_fixer.exe example.cia`
+For a single .cia file: `nsui_banner_fixer.exe example.cia`
 
-or copy all the .cia files you want to fix next to the executable and run the program by double clicking.
+For all .cia files in the same directory as the .exe: `nsui_banner_fixer.exe`
 
-Either  way your fixed .cia files will be created in the `out` directory.
+Double clicking the executable also fixes all .cia files in the directory.
+
+By default your fixed .cia files will be created in the `out` directory.
+
+Use the `-r` argument to instead edit the .cia files directly without making a copy.
 
 Use the `-v` argument to see more info during the process.

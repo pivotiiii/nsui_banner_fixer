@@ -21,6 +21,7 @@
 *.icn
 *0000000
 *license.txt
+.vscode
 __pycache__
 dist
 build
