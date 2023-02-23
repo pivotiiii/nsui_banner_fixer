@@ -18,10 +18,12 @@ import argparse
 locale_codes = [b"EUR_EN", b"EUR_FR", b"EUR_GE", b"EUR_IT", b"EUR_SP", b"EUR_DU", b"EUR_PO", b"EUR_RU", b"JPN_JP", b"USA_EN", b"USA_FR", b"USA_SP", b"USA_PO"]
 locale_offsets = [0x14BC, 0x14CB]
 verbose = False
+replace = False
 
 class Game(object):
     def __init__(self, cia: str):
         self.cia_path = os.path.abspath(cia)
+        print(self.cia_path)
         self.name = os.path.splitext(os.path.basename(cia))[0]
         self.banner_ext = "bin"
         self.v = "v"
@@ -102,7 +104,11 @@ class Game(object):
         
         if not os.path.exists("./out"):
             os.mkdir("./out")
-        subprocess.run(["tools/makerom", "-f", "cia", "-o", f"out/{self.name}.cia", "-content", f"{self.cwd}/{self.name}.cxi:0:0x00"])
+        if replace:
+            out_cia = self.cia_path
+        else:
+            out_cia = f"out/{self.name}.cia"
+        subprocess.run(["tools/makerom", "-f", "cia", "-o", out_cia, "-content", f"{self.cwd}/{self.name}.cxi:0:0x00"])
         shutil.rmtree(f"./temp")
 
 def check_requirements():
@@ -121,14 +127,14 @@ def clean_dirs():
             shutil.rmtree(f"./temp")
 
 def finish():
-    env = os.environ()
+    env = os.environ
     prompter = "PROMPT" in env
     browser = False
     for key in env:
         if key.startswith("FPS_BROWSER_"):
             browser = True
     if browser and not prompter:
-        input("Press any key to finish.")
+        os.system('pause')
 
 
 if __name__ == "__main__":
@@ -140,9 +146,11 @@ if __name__ == "__main__":
         epilog = "Either supply a .cia file as argument or place all the files you want to convert next to nsui_banner_fixer.exe.")
     parser.add_argument("input", metavar = "input.cia", type = str, nargs = "*", help = "path to a .cia file")
     parser.add_argument("-v", "--verbose", action = "store_true", help = "show more information while fixing cia")
+    parser.add_argument("-r", "--replace", action = "store_true", help = "replace .cia files instead of saving to /out")
 
     args = parser.parse_args()
     verbose = args.verbose
+    replace = args.replace
     if args.input:
         cia = args.input[0]
         if not cia.endswith(".cia"):
@@ -168,7 +176,10 @@ if __name__ == "__main__":
         game.edit_bcmdl()
         print("--- repacking cia")
         game.repack_cia()
-        print(f"--- done --> saved at out/{name}.cia")
+        if replace:
+            print(f"--- done --> replaced {name}.cia")
+        else:
+            print(f"--- done --> saved at out/{name}.cia")
     print("\nWARNING! Overwriting an injected GBA game will overwrite its save file.")
     print("Consider backing up your saves before, e.g. with GBAVCSM (https://github.com/TurdPooCharger/GBAVCSM)")
     finish()

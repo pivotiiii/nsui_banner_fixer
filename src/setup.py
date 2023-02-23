@@ -2,7 +2,7 @@
 
 app_name = "nsui_banner_fixer"
 description = "YANBF Generator"
-version = "1.1"
+version = "1.2"
 imports = ["os", "subprocess", "argparse", "shutil"]
 bdir = "../dist/nsui_banner_fixer"
 
