@@ -24,6 +24,8 @@
 .vscode
 __pycache__
 dist
+disto
+*Kopie*
 build
 bannertool*
 makerom*
