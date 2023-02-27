@@ -20,3 +20,7 @@ By default your fixed .cia files will be created in the `out` directory.
 Use the `-r` argument to instead edit the .cia files directly without making a copy.
 
 Use the `-v` argument to see more info during the process.
+
+#  Requirements
+
+Visual C++ Redistributable for Visual Studio 2017, 2019 or 2022: You most  likely already have this installed, but in case you get any errors about missing .dll files, you can download the installer for [64bit](https://aka.ms/vs/16/release/vc_redist.x64.exe) or [32bit](https://aka.ms/vs/16/release/vc_redist.x86.exe) directly from Microsoft.
