@@ -14,6 +14,7 @@ import os
 import subprocess
 import shutil
 import argparse
+import psutil # type: ignore
 
 locale_codes = [b"EUR_EN", b"EUR_FR", b"EUR_GE", b"EUR_IT", b"EUR_SP", b"EUR_DU", b"EUR_PO", b"EUR_RU", b"JPN_JP", b"USA_EN", b"USA_FR", b"USA_SP", b"USA_PO"]
 locale_offsets = [0x14BC, 0x14CB]
@@ -56,30 +57,30 @@ class Game(object):
         subprocess.run(["tools/3dstool", f"-x{self.v}", "-t", "banner", "-f", f"{self.cwd}/exefs/banner.{self.banner_ext}", "--banner-dir", f"{self.cwd}/banner"])
 
     def edit_bcmdl(self):
-        for i in range(1, 14):
-            with open(f"./{self.cwd}/banner/banner{i}.bcmdl", "r+b") as f:
-                f.seek(locale_offsets[0], 0)
-                data = f.read(6)
-                if verbose: print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[0])} was {data}")
-                if data != b"USA_EN" and data != locale_codes[i-1]:
-                    print("ERROR: wrong offset for locale string 1")
-                    exit()
-                f.seek(locale_offsets[0], 0)
-                f.write(locale_codes[i-1])
-                f.seek(locale_offsets[1], 0)
-                data = f.read(6)
-                if verbose: print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[1])} was {data}")
-                if data != b"USA_EN" and data != locale_codes[i-1]:
-                    print("ERROR: wrong offset for locale string 2")
-                    exit()
-                f.seek(locale_offsets[1], 0)
-                f.write(locale_codes[i-1])
-                if verbose:
+        try:
+            for i in range(1, 14):
+                with open(f"./{self.cwd}/banner/banner{i}.bcmdl", "r+b") as f:
                     f.seek(locale_offsets[0], 0)
-                    print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[0])} is now {f.read(6)}")
+                    data = f.read(6)
+                    if verbose: print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[0])} was {data}")
+                    if data != b"USA_EN" and data != locale_codes[i-1]:
+                        finish("ERROR: wrong offset for locale string 1")
+                    f.seek(locale_offsets[0], 0)
+                    f.write(locale_codes[i-1])
                     f.seek(locale_offsets[1], 0)
-                    print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[1])} is now {f.read(6)}")
-            
+                    data = f.read(6)
+                    if verbose: print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[1])} was {data}")
+                    if data != b"USA_EN" and data != locale_codes[i-1]:
+                        finish("ERROR: wrong offset for locale string 2")
+                    f.seek(locale_offsets[1], 0)
+                    f.write(locale_codes[i-1])
+                    if verbose:
+                        f.seek(locale_offsets[0], 0)
+                        print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[0])} is now {f.read(6)}")
+                        f.seek(locale_offsets[1], 0)
+                        print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[1])} is now {f.read(6)}")
+        except FileNotFoundError:
+            finish(f"ERROR: Could not find ./{self.cwd}/banner/banner{i}.bcmdl after extracting the banner.\nWas {self.name}.cia created with NSUI v28 using the 3D GBA banner?")
 
     def repack_cia(self):
         os.remove(f"./{self.cwd}/exefs/banner.{self.banner_ext}")
@@ -113,11 +114,11 @@ class Game(object):
 
 def check_requirements():
     if not os.path.exists("./tools/3dstool.exe"):
-        print("ERROR: 3dstool.exe is missing")
+        finish("ERROR: 3dstool.exe is missing")
     if not os.path.exists("./tools/ctrtool.exe"):
-        print("ERROR: ctrtool.exe is missing!")
+        finish("ERROR: ctrtool.exe is missing!")
     if not os.path.exists("./tools/makerom.exe"):
-        print("ERROR: makerom.exe is missing!")
+        finish("ERROR: makerom.exe is missing!")
 
 def get_cias() -> list:
     return [os.path.abspath(f) for f in os.listdir(".") if f.endswith(".cia")]
@@ -126,15 +127,13 @@ def clean_dirs():
     if os.path.exists(f"./temp"):
             shutil.rmtree(f"./temp")
 
-def finish():
-    env = os.environ
-    prompter = "PROMPT" in env
-    browser = False
-    for key in env:
-        if key.startswith("FPS_BROWSER_"):
-            browser = True
-    if browser and not prompter:
-        os.system('pause')
+def finish(err_msg = None):
+    if err_msg:
+        print("")
+        print(err_msg)
+    if psutil.Process(os.getpid()).parent().parent().name() == "explorer.exe":
+        os.system('pause')        
+    raise SystemExit
 
 
 if __name__ == "__main__":
@@ -154,17 +153,16 @@ if __name__ == "__main__":
     if args.input:
         cia = args.input[0]
         if not cia.endswith(".cia"):
-            print("ERROR: did you pass a .cia file?")
-            finish()
-            exit()
+            finish("ERROR: did you pass a .cia file?")
         if not os.path.exists(cia):
-            print("ERROR: could not find .cia file")
-            finish()
-            exit()
+            finish("ERROR: could not find .cia file")
         files = [cia]
     else:
         files = get_cias()
 
+    if len(files) == 0:
+        parser.print_help()
+        finish()
     clean_dirs()
     for cia in files:
         name = os.path.splitext(os.path.basename(cia))[0]
