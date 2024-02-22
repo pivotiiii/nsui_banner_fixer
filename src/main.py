@@ -54,9 +54,9 @@ class Game(object):
     def extract_cia(self):
         os.mkdir(f"./{self.cwd}")
         if verbose:
-            subprocess.run(["tools/ctrtool", f"--contents={self.cwd}/contents", f"{self.name}.cia"])
+            subprocess.run(["tools/ctrtool", f"--contents={self.cwd}/contents", self.cia_path])
         else:
-            subprocess.run(["tools/ctrtool", f"--contents={self.cwd}/contents", f"{self.name}.cia"], stdout=subprocess.DEVNULL)
+            subprocess.run(["tools/ctrtool", f"--contents={self.cwd}/contents", self.cia_path], stdout=subprocess.DEVNULL)
         
         subprocess.run([
             "tools/3dstool", f"-x{self.v}", "-t", "cxi", "-f", f"{self.cwd}/contents.0000.00000000",
