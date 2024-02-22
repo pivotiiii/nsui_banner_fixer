@@ -132,7 +132,7 @@ class Game(object):
         if replace:
             out_cia = self.cia_path
         else:
-            out_cia = os.path.join(script_dir, "out", f"{self.name}.cia")
+            out_cia = os.path.join(script_dir, "out", f"{self.name}.cia").replace("\\\\", "/")
         subprocess.run([makerom, "-f", "cia", 
                         "-o", out_cia, 
                         "-content", f"{self.cwd}/{self.name}.cxi:0:0x00", 
