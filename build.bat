@@ -12,8 +12,12 @@ IF /I "%ERRORLEVEL%" NEQ "1" (
 goto err
 :zip
 echo:
-zip nsui_banner_fixer.zip nsui_banner_fixer.exe tools/*
+zip nsui_banner_fixer_exe.zip nsui_banner_fixer.exe tools/*
 echo zip created
+ren main.py nsui_banner_fixer.py
+zip nsui_banner_fixer_py.zip nsui_banner_fixer.py tools/*
+echo zip py created
+ren nsui_banner_fixer.py main.py
 goto end
 :err
 pause
