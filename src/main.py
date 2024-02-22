@@ -22,6 +22,11 @@ locale_codes = [b"EUR_EN", b"EUR_FR", b"EUR_GE", b"EUR_IT", b"EUR_SP", b"EUR_DU"
 locale_offsets = [0x14BC, 0x14CB]
 verbose = False
 replace = False
+script_dir = os.path.dirname(os.path.abspath(__file__))
+temp_dir = os.path.join(script_dir, "temp")
+dstool = os.path.join(script_dir, "tools", "3dstool.exe")
+ctrtool = os.path.join(script_dir, "tools", "ctrtool.exe")
+makerom = os.path.join(script_dir, "tools", "makerom.exe")
 
 class Game(object):
     def __init__(self, cia: str):
@@ -32,16 +37,19 @@ class Game(object):
         self.v = "v"
         if not verbose:
             self.v = ""
-        os.mkdir("./temp")
-        self.cwd = f"temp/{self.name}"
+        try:
+            os.mkdir(temp_dir)
+        except FileExistsError:
+            clean_dirs()
+        self.cwd = os.path.join(temp_dir, self.name)
         self.version = self.get_version()
         
     def get_version(self):
-        output = subprocess.check_output(["tools/ctrtool", "-i", self.cia_path])
+        output = subprocess.check_output([ctrtool, "-i", self.cia_path])
         for line in [bytes.decode(sys.stdout.encoding) for bytes in output.splitlines()]:
             if line.startswith("Title version:"):
                 try:
-                    match = re.search("(\d+).(\d+).(\d+)", line)
+                    match = re.search(r"(\d+).(\d+).(\d+)", line)
                     major = max(min(63, int(match.group(1))), 0) #values 0-63 https://github.com/3DSGuy/Project_CTR/blob/master/makerom/README.md#:~:text=%2Dmajor%20%3Cversion%3E,micro%20for%20the%20title.
                     minor = max(min(63, int(match.group(2))), 0) #values 0-63
                     micro = max(min(15, int(match.group(3))), 0) #values 0-15
@@ -52,30 +60,30 @@ class Game(object):
 
 
     def extract_cia(self):
-        os.mkdir(f"./{self.cwd}")
+        os.mkdir(self.cwd)
         if verbose:
-            subprocess.run(["tools/ctrtool", f"--contents={self.cwd}/contents", self.cia_path])
+            subprocess.run([ctrtool, f"--contents={self.cwd}/contents", self.cia_path])
         else:
-            subprocess.run(["tools/ctrtool", f"--contents={self.cwd}/contents", self.cia_path], stdout=subprocess.DEVNULL)
+            subprocess.run([ctrtool, f"--contents={self.cwd}/contents", self.cia_path], stdout=subprocess.DEVNULL)
         
         subprocess.run([
-            "tools/3dstool", f"-x{self.v}", "-t", "cxi", "-f", f"{self.cwd}/contents.0000.00000000",
+            dstool, f"-x{self.v}", "-t", "cxi", "-f", f"{self.cwd}/contents.0000.00000000",
             "--header", f"{self.cwd}/ncch.header",
             "--exh", f"{self.cwd}/exheader.bin",
             "--exefs", f"{self.cwd}/exefs.bin",
             "--romfs", f"{self.cwd}/romfs.bin"])
 
-        subprocess.run(["tools/3dstool", f"-x{self.v}", "-t", "exefs", "-f", f"{self.cwd}/exefs.bin", "--header", f"{self.cwd}/exefs.header", "--exefs-dir", f"{self.cwd}/exefs"])
+        subprocess.run([dstool, f"-x{self.v}", "-t", "exefs", "-f", f"{self.cwd}/exefs.bin", "--header", f"{self.cwd}/exefs.header", "--exefs-dir", f"{self.cwd}/exefs"])
         
-        os.mkdir(f"./{self.cwd}/banner")
-        if os.path.exists(f"./{self.cwd}/exefs/banner.bnr"):
+        os.mkdir(os.path.join(self.cwd, "banner"))
+        if os.path.exists(os.path.join(self.cwd, "exefs", "banner.bnr")):
             self.banner_ext = "bnr"
-        subprocess.run(["tools/3dstool", f"-x{self.v}", "-t", "banner", "-f", f"{self.cwd}/exefs/banner.{self.banner_ext}", "--banner-dir", f"{self.cwd}/banner"])
+        subprocess.run([dstool, f"-x{self.v}", "-t", "banner", "-f", f"{self.cwd}/exefs/banner.{self.banner_ext}", "--banner-dir", f"{self.cwd}/banner"])
 
     def edit_bcmdl(self):
         try:
             for i in range(1, 14):
-                with open(f"./{self.cwd}/banner/banner{i}.bcmdl", "r+b") as f:
+                with open(os.path.join(self.cwd, "banner", f"banner{i}.bcmdl"), "r+b") as f:
                     f.seek(locale_offsets[0], 0)
                     data = f.read(6)
                     if verbose: print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[0])} was {data}")
@@ -99,54 +107,54 @@ class Game(object):
             finish(f"ERROR: Could not find ./{self.cwd}/banner/banner{i}.bcmdl after extracting the banner.\nWas {self.name}.cia created with NSUI v28 using the 3D GBA banner?")
 
     def repack_cia(self):
-        os.remove(f"./{self.cwd}/exefs/banner.{self.banner_ext}")
+        os.remove(os.path.join(self.cwd, "exefs", f"banner.{self.banner_ext}"))
         subprocess.run([
-            "tools/3dstool", f"-c{self.v}", "-t", "banner", 
+            dstool, f"-c{self.v}", "-t", "banner", 
             "-f", f"{self.cwd}/exefs/banner.{self.banner_ext}", 
             "--banner-dir", f"{self.cwd}/banner"])
 
         subprocess.run([
-            "tools/3dstool", f"-c{self.v}", "-t", "exefs",
+            dstool, f"-c{self.v}", "-t", "exefs",
             "-f", f"{self.cwd}/exefs.bin",
             "--header", f"{self.cwd}/exefs.header",
             "--exefs-dir", f"{self.cwd}/exefs"])
         
         subprocess.run([
-            "tools/3dstool", f"-c{self.v}", "-t", "cxi", 
+            dstool, f"-c{self.v}", "-t", "cxi", 
             "-f", f"{self.cwd}/{self.name}.cxi", 
             "--header", f"{self.cwd}/ncch.header", 
             "--exh", f"{self.cwd}/exheader.bin",
             "--exefs", f"{self.cwd}/exefs.bin",
             "--romfs", f"{self.cwd}/romfs.bin"])
         
-        if not os.path.exists("./out"):
-            os.mkdir("./out")
+        if not os.path.exists(os.path.join(script_dir, "out")):
+            os.mkdir(os.path.join(script_dir, "out"))
         if replace:
             out_cia = self.cia_path
         else:
-            out_cia = f"out/{self.name}.cia"
-        subprocess.run(["tools/makerom", "-f", "cia", 
+            out_cia = os.path.join(script_dir, "out", f"{self.name}.cia")
+        subprocess.run([makerom, "-f", "cia", 
                         "-o", out_cia, 
                         "-content", f"{self.cwd}/{self.name}.cxi:0:0x00", 
                         "-major", str(self.version[0]),
                         "-minor", str(self.version[1]), 
                         "-micro", str(self.version[2])])
-        shutil.rmtree(f"./temp")
+        shutil.rmtree(temp_dir)
 
 def check_requirements():
-    if not os.path.exists("./tools/3dstool.exe"):
+    if not os.path.exists(dstool):
         finish("ERROR: 3dstool.exe is missing")
-    if not os.path.exists("./tools/ctrtool.exe"):
+    if not os.path.exists(ctrtool):
         finish("ERROR: ctrtool.exe is missing!")
-    if not os.path.exists("./tools/makerom.exe"):
+    if not os.path.exists(makerom):
         finish("ERROR: makerom.exe is missing!")
 
 def get_cias() -> list:
-    return [os.path.abspath(f) for f in os.listdir(".") if f.endswith(".cia")]
+    return [os.path.abspath(f) for f in os.listdir(script_dir) if f.endswith(".cia")]
 
 def clean_dirs():
-    if os.path.exists(f"./temp"):
-            shutil.rmtree(f"./temp")
+    if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
 
 def finish(err_msg = None):
     if err_msg:
