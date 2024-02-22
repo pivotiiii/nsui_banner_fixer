@@ -7,6 +7,16 @@ This fixes GBA VC banners created with [New Super Ultimate Injector v28](https:/
 WARNING: Overwriting an injected GBA game will overwrite its save file.
 Consider backing up your saves before, e.g. with [GBAVCSM](https://github.com/TurdPooCharger/GBAVCSM).
 
+# Download
+
+The download can be found at the bottom of the releases section [HERE](https://github.com/pivotiiii/nsui_banner_fixer/releases/latest). 
+
+There are two versions available:
+
+The `.exe` version is a standalone executable that comes prepackaged with all necessary Python files and dependencies. It tends to be falsely identified as a threat by antivirus software because of that. You may need to create an exception for `nsui_banner_fixer.exe` in your antivirus software.
+
+The `.py` version is just the plain Python script +  dependencies. As long as you have Python 3 (I am using 3.9, lower versions may work) installed on your system this works the same as the .exe but will not be identified as a virus. It also saves a few MB of disk space :)
+
 # Usage
 
 Command line:
