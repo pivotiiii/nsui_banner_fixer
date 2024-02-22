@@ -20,27 +20,22 @@ import sys
 
 locale_codes = [b"EUR_EN", b"EUR_FR", b"EUR_GE", b"EUR_IT", b"EUR_SP", b"EUR_DU", b"EUR_PO", b"EUR_RU", b"JPN_JP", b"USA_EN", b"USA_FR", b"USA_SP", b"USA_PO"]
 locale_offsets = [0x14BC, 0x14CB]
+
 verbose = False
 replace = False
-script_dir = os.path.dirname(os.path.abspath(__file__))
-temp_dir = os.path.join(script_dir, "temp")
-dstool = os.path.join(script_dir, "tools", "3dstool.exe")
-ctrtool = os.path.join(script_dir, "tools", "ctrtool.exe")
-makerom = os.path.join(script_dir, "tools", "makerom.exe")
+
+temp_dir = os.path.join(os.getcwd(), "temp")
+
+dstool = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "3dstool.exe")
+ctrtool = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "ctrtool.exe")
+makerom = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "makerom.exe")
 
 class Game(object):
     def __init__(self, cia: str):
         self.cia_path = os.path.abspath(cia)
-        print(self.cia_path)
         self.name = os.path.splitext(os.path.basename(cia))[0]
         self.banner_ext = "bin"
-        self.v = "v"
-        if not verbose:
-            self.v = ""
-        try:
-            os.mkdir(temp_dir)
-        except FileExistsError:
-            clean_dirs()
+        self.v = "v" if verbose else ""
         self.cwd = os.path.join(temp_dir, self.name)
         self.version = self.get_version()
         
@@ -81,30 +76,27 @@ class Game(object):
         subprocess.run([dstool, f"-x{self.v}", "-t", "banner", "-f", f"{self.cwd}/exefs/banner.{self.banner_ext}", "--banner-dir", f"{self.cwd}/banner"])
 
     def edit_bcmdl(self):
-        try:
-            for i in range(1, 14):
-                with open(os.path.join(self.cwd, "banner", f"banner{i}.bcmdl"), "r+b") as f:
+        for i in range(1, 14):
+            with open(os.path.join(self.cwd, "banner", f"banner{i}.bcmdl"), "r+b") as f:
+                f.seek(locale_offsets[0], 0)
+                data = f.read(6)
+                if verbose: print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[0])} was {data}")
+                if data != b"USA_EN" and data != locale_codes[i-1]:
+                    finish("ERROR: wrong offset for locale string 1")
+                f.seek(locale_offsets[0], 0)
+                f.write(locale_codes[i-1])
+                f.seek(locale_offsets[1], 0)
+                data = f.read(6)
+                if verbose: print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[1])} was {data}")
+                if data != b"USA_EN" and data != locale_codes[i-1]:
+                    finish("ERROR: wrong offset for locale string 2")
+                f.seek(locale_offsets[1], 0)
+                f.write(locale_codes[i-1])
+                if verbose:
                     f.seek(locale_offsets[0], 0)
-                    data = f.read(6)
-                    if verbose: print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[0])} was {data}")
-                    if data != b"USA_EN" and data != locale_codes[i-1]:
-                        finish("ERROR: wrong offset for locale string 1")
-                    f.seek(locale_offsets[0], 0)
-                    f.write(locale_codes[i-1])
+                    print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[0])} is now {f.read(6)}")
                     f.seek(locale_offsets[1], 0)
-                    data = f.read(6)
-                    if verbose: print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[1])} was {data}")
-                    if data != b"USA_EN" and data != locale_codes[i-1]:
-                        finish("ERROR: wrong offset for locale string 2")
-                    f.seek(locale_offsets[1], 0)
-                    f.write(locale_codes[i-1])
-                    if verbose:
-                        f.seek(locale_offsets[0], 0)
-                        print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[0])} is now {f.read(6)}")
-                        f.seek(locale_offsets[1], 0)
-                        print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[1])} is now {f.read(6)}")
-        except FileNotFoundError:
-            finish(f"ERROR: Could not find ./{self.cwd}/banner/banner{i}.bcmdl after extracting the banner.\nWas {self.name}.cia created with NSUI v28 using the 3D GBA banner?")
+                    print(f"banner{i}.bcmdl of {self.name}.cia at {hex(locale_offsets[1])} is now {f.read(6)}")
 
     def repack_cia(self):
         os.remove(os.path.join(self.cwd, "exefs", f"banner.{self.banner_ext}"))
@@ -127,19 +119,38 @@ class Game(object):
             "--exefs", f"{self.cwd}/exefs.bin",
             "--romfs", f"{self.cwd}/romfs.bin"])
         
-        if not os.path.exists(os.path.join(script_dir, "out")):
-            os.mkdir(os.path.join(script_dir, "out"))
+        
         if replace:
             out_cia = self.cia_path
         else:
-            out_cia = os.path.join(script_dir, "out", f"{self.name}.cia").replace("\\\\", "/")
+            out_dir = os.path.join(os.getcwd(), "out")
+            if not os.path.exists(out_dir):
+                os.mkdir(os.path.join(out_dir))
+            out_cia = os.path.join(out_dir, f"{self.name}.cia")
+        content_path_rel = os.path.relpath(os.path.join(self.cwd, f"{self.name}.cxi")) #makerom doesn't work with absolute paths because of the colon after the drive letter :(
         subprocess.run([makerom, "-f", "cia", 
                         "-o", out_cia, 
-                        "-content", f"{self.cwd}/{self.name}.cxi:0:0x00", 
+                        "-content", f"{content_path_rel}:0:0x00", 
                         "-major", str(self.version[0]),
                         "-minor", str(self.version[1]), 
                         "-micro", str(self.version[2])])
         shutil.rmtree(temp_dir)
+
+    def fix_banner(self):
+        clean_dirs()
+        os.mkdir(temp_dir)
+        print(self.cia_path)
+        print("--- extracting cia")
+        self.extract_cia()
+        print("--- editing banner")
+        self.edit_bcmdl()
+        print("--- repacking cia")
+        self.repack_cia()
+        if replace:
+            print(f"--- done --> replaced {self.name}.cia")
+        else:
+            print(f"--- done --> saved at out/{self.name}.cia")
+        clean_dirs()
 
 def check_requirements():
     if not os.path.exists(dstool):
@@ -149,8 +160,16 @@ def check_requirements():
     if not os.path.exists(makerom):
         finish("ERROR: makerom.exe is missing!")
 
-def get_cias() -> list:
-    return [os.path.abspath(f) for f in os.listdir(script_dir) if f.endswith(".cia")]
+def get_cias(args) -> list:
+    if args.input:
+        cia = args.input[0]
+        if not cia.endswith(".cia"):
+            finish("ERROR: did you pass a .cia file?")
+        if not os.path.exists(cia):
+            finish("ERROR: could not find .cia file")
+        return [cia]
+    else:
+        return [os.path.abspath(f) for f in os.listdir(os.getcwd()) if f.endswith(".cia")]
 
 def clean_dirs():
     if os.path.exists(temp_dir):
@@ -171,7 +190,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog = "nsui_banner_fixer.exe", 
         description = "NSUI Banner Fixer",
-        epilog = "Either supply a .cia file as argument or place all the files you want to convert next to nsui_banner_fixer.exe.")
+        epilog = "Either supply a .cia file as an argument or place all the files you want to convert in your current working directory.")
     parser.add_argument("input", metavar = "input.cia", type = str, nargs = "*", help = "path to a .cia file")
     parser.add_argument("-v", "--verbose", action = "store_true", help = "show more information while fixing cia")
     parser.add_argument("-r", "--replace", action = "store_true", help = "replace .cia files instead of saving to /out")
@@ -179,34 +198,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
     verbose = args.verbose
     replace = args.replace
-    if args.input:
-        cia = args.input[0]
-        if not cia.endswith(".cia"):
-            finish("ERROR: did you pass a .cia file?")
-        if not os.path.exists(cia):
-            finish("ERROR: could not find .cia file")
-        files = [cia]
-    else:
-        files = get_cias()
+    files = get_cias(args)
 
     if len(files) == 0:
         parser.print_help()
         finish()
-    clean_dirs()
+    
     for cia in files:
-        name = os.path.splitext(os.path.basename(cia))[0]
-        print(f"\n{name}.cia")
         game = Game(cia)
-        print("--- extracting cia")
-        game.extract_cia()
-        print("--- editing banner")
-        game.edit_bcmdl()
-        print("--- repacking cia")
-        game.repack_cia()
-        if replace:
-            print(f"--- done --> replaced {name}.cia")
-        else:
-            print(f"--- done --> saved at out/{name}.cia")
+        try:
+            game.fix_banner()
+        except FileNotFoundError:
+            print(f"ERROR: Was {game.name}.cia created with NSUI v28 using the 3D GBA banner?")
+    
     print("\nWARNING! Overwriting an injected GBA game will overwrite its save file.")
     print("Consider backing up your saves before, e.g. with GBAVCSM (https://github.com/TurdPooCharger/GBAVCSM)")
     finish()
