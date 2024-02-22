@@ -15,6 +15,8 @@ import subprocess
 import shutil
 import argparse
 import psutil # type: ignore
+import re
+import sys
 
 locale_codes = [b"EUR_EN", b"EUR_FR", b"EUR_GE", b"EUR_IT", b"EUR_SP", b"EUR_DU", b"EUR_PO", b"EUR_RU", b"JPN_JP", b"USA_EN", b"USA_FR", b"USA_SP", b"USA_PO"]
 locale_offsets = [0x14BC, 0x14CB]
@@ -32,7 +34,21 @@ class Game(object):
             self.v = ""
         os.mkdir("./temp")
         self.cwd = f"temp/{self.name}"
+        self.version = self.get_version()
         
+    def get_version(self):
+        output = subprocess.check_output(["tools/ctrtool", "-i", self.cia_path])
+        for line in [bytes.decode(sys.stdout.encoding) for bytes in output.splitlines()]:
+            if line.startswith("Title version:"):
+                try:
+                    match = re.search("(\d+).(\d+).(\d+)", line)
+                    major = max(min(63, int(match.group(1))), 0) #values 0-63 https://github.com/3DSGuy/Project_CTR/blob/master/makerom/README.md#:~:text=%2Dmajor%20%3Cversion%3E,micro%20for%20the%20title.
+                    minor = max(min(63, int(match.group(2))), 0) #values 0-63
+                    micro = max(min(15, int(match.group(3))), 0) #values 0-15
+                    return (major, minor, micro)
+                except (AttributeError, IndexError):
+                    break
+        return (0, 0, 0)
 
 
     def extract_cia(self):
@@ -109,7 +125,12 @@ class Game(object):
             out_cia = self.cia_path
         else:
             out_cia = f"out/{self.name}.cia"
-        subprocess.run(["tools/makerom", "-f", "cia", "-o", out_cia, "-content", f"{self.cwd}/{self.name}.cxi:0:0x00"])
+        subprocess.run(["tools/makerom", "-f", "cia", 
+                        "-o", out_cia, 
+                        "-content", f"{self.cwd}/{self.name}.cxi:0:0x00", 
+                        "-major", str(self.version[0]),
+                        "-minor", str(self.version[1]), 
+                        "-micro", str(self.version[2])])
         shutil.rmtree(f"./temp")
 
 def check_requirements():
