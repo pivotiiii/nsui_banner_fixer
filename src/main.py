@@ -14,7 +14,6 @@ import os
 import subprocess
 import shutil
 import argparse
-import psutil # type: ignore
 import re
 import sys
 
@@ -24,11 +23,15 @@ locale_offsets = [0x14BC, 0x14CB]
 verbose = False
 replace = False
 
+if "nsui_banner_fixer.exe" in sys.argv[0]:      #.exe nuitka
+    script_dir = os.path.abspath(sys.argv[0])
+else:                                           #.py
+    script_dir = os.path.abspath(__file__)
 temp_dir = os.path.join(os.getcwd(), "temp")
 
-dstool = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "3dstool.exe")
-ctrtool = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "ctrtool.exe")
-makerom = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "makerom.exe")
+dstool = os.path.join(os.path.dirname(script_dir), "tools", "3dstool.exe")
+ctrtool = os.path.join(os.path.dirname(script_dir), "tools", "ctrtool.exe")
+makerom = os.path.join(os.path.dirname(script_dir), "tools", "makerom.exe")
 
 class Game(object):
     def __init__(self, cia: str):
@@ -52,7 +55,6 @@ class Game(object):
                 except (AttributeError, IndexError):
                     break
         return (0, 0, 0)
-
 
     def extract_cia(self):
         os.mkdir(self.cwd)
@@ -179,8 +181,8 @@ def finish(err_msg = None):
     if err_msg:
         print("")
         print(err_msg)
-    if psutil.Process(os.getpid()).parent().parent().name() == "explorer.exe":
-        os.system('pause')        
+    if os.name == 'nt' and 'PROMPT' not in os.environ: #launched from explorer
+        os.system('pause')  
     raise SystemExit
 
 
