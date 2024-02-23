@@ -9,25 +9,27 @@ Consider backing up your saves before, e.g. with [GBAVCSM](https://github.com/Tu
 
 # Download
 
-The download can be found at the bottom of the releases section [HERE](https://github.com/pivotiiii/nsui_banner_fixer/releases/latest). 
+**The download can be found at the bottom of the releases section [HERE](https://github.com/pivotiiii/nsui_banner_fixer/releases/latest).**
 
 There are two versions available:
 
 The `.exe` version is a standalone executable that comes prepackaged with all necessary Python files and dependencies. It tends to be falsely identified as a threat by antivirus software because of that. You may need to create an exception for `nsui_banner_fixer.exe` in your antivirus software.
 
-The `.py` version is just the plain Python script +  dependencies. As long as you have Python 3 (I am using 3.9, lower versions may work) installed on your system this works the same as the .exe but will not be identified as a virus. It also saves a few MB of disk space :)
+The `.py` version is just the plain Python script +  dependencies. As long as you have Python 3 (I am using 3.9, anything above 3.6 *should* work) installed on your system this works the same as the .exe but will not be identified as a virus. It also saves a few MB of disk space :)
 
 # Usage
 
-Command line:
+### Double clicking the .exe or .py file:
+
+If you put all .cia files you want to fix into the same directory as `nsui_banner_fixer.exe/.py` you can simply double click and all fixed .cia files will be saved in the newly created `out` directory.
+
+### Command line:
 
 For a single .cia file: `nsui_banner_fixer.exe example.cia`
 
-For all .cia files in the same directory as the .exe: `nsui_banner_fixer.exe`
+For all .cia files in your current working directory: `nsui_banner_fixer.exe`
 
-Double clicking the executable also fixes all .cia files in the directory.
-
-By default your fixed .cia files will be created in the `out` directory.
+By default your fixed .cia files will be created in the `out` directory of your current working directory.
 
 Use the `-r` argument to instead edit the .cia files directly without making a copy.
 
