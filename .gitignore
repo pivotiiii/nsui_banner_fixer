@@ -21,6 +21,9 @@
 *.icn
 *0000000
 *license.txt
+*.pdb
+*.obj
+*.ilk
 .vscode
 __pycache__
 dist
