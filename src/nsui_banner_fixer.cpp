@@ -8,6 +8,13 @@
 #include <tclap/Cmdline.h>
 #include <subprocess.hpp>
 
+//subprocess.hpp defines these for some reason, which breaks fstream.open() etc ._.
+#ifdef open
+#undef open
+#undef close
+#undef fileno
+#endif
+
 namespace fs = std::filesystem;
 namespace sp = subprocess;
 
@@ -69,10 +76,11 @@ class Game
             fs::remove_all(this->cwd.parent_path());
         }
 
-        int fix_banner()
+        int fix_banner(bool replace = false, bool verbose = false)
         {
-            this->extract_cia();
-            this->edit_bcmdl();
+            this->extract_cia(verbose);
+            this->edit_bcmdl(verbose);
+            this->repack_cia(replace, verbose);
             return 0;
         }
 
@@ -96,8 +104,6 @@ class Game
                 std::string line;
                 while (std::getline(ss, line, '\n')){
                     if (line.starts_with("Title version:")){
-                        std::cout << line << std::endl;
-
                         std::regex version_regex("(\\d+).(\\d+).(\\d+)");
                         std::smatch matches;
                         if (std::regex_search(line, matches, version_regex)){
@@ -111,15 +117,17 @@ class Game
                     }    
                 }
             }
-            std::cout << version.major << version.minor << version.micro << std::endl;
             return version;
         }
 
-        int extract_cia()
+        int extract_cia(bool verbose = false)
         {
-            if (sp::call({ctrtool.string(), 
+            std::vector<std::string> extract_contents = {ctrtool.string(),
                             std::string("--contents=") + (this->cwd / "contents").string(), 
-                            this->cia_path.string()}))
+                            this->cia_path.string()};
+            for (auto i : extract_contents)
+                std::cout << i << " ";
+            if (sp::call(extract_contents))
                 return 1;
             
             if (sp::call({dstool.string(),
@@ -151,7 +159,7 @@ class Game
             return 0;
         }
 
-        int edit_bcmdl()
+        int edit_bcmdl(bool verbose = false)
         {
             for (int i = 1; i < 14; i++){
                 std::fstream file;
@@ -162,7 +170,6 @@ class Game
                     for (auto const& offset : locale_offsets){
                         file.seekg(offset, std::fstream::beg);
                         file.read(rbuf, 6);
-                        std::cout << rbuf << "\n";
                         if (!strncmp(rbuf, locale_codes[i-1].c_str(), 6) && !strncmp(rbuf, "USA_EN", 6))
                             return 1;
                         file.seekp(offset, std::fstream::beg);
@@ -174,7 +181,7 @@ class Game
             return 0;
         }
 
-        int repack_cia()
+        int repack_cia(bool replace = false, bool verbose = false)
         {
             fs::remove(this->cwd / "exefs" / (std::string("banner.") + this->banner_ext));
             std::vector<std::string> rebuild_banner = {dstool.string(),
@@ -186,7 +193,7 @@ class Game
             
             std::vector<std::string> rebuild_exefs = {dstool.string(),
                                                         "-c", "-t",
-                                                        "exefs", (this->cwd / "exefs.bin").string(),
+                                                        "exefs", "-f", (this->cwd / "exefs.bin").string(),
                                                         "--header", (this->cwd / "exefs.header").string(),
                                                         "--exefs-dir", (this->cwd / "exefs").string()};
             if (sp::call(rebuild_exefs))
@@ -202,19 +209,80 @@ class Game
             if (sp::call(rebuild_cxi))
                 return 1;
 
+            fs::path out_cia;
+            if (replace){
+                out_cia = this->cia_path;
+            }
+            else {
+                fs::path out_dir = this->cwd.parent_path().parent_path() / "out";
+                fs::create_directories(out_dir);
+                out_cia = out_dir / (this->name  + ".cia");
+            }
+            fs::path content_path_rel = fs::relative(this->cwd / (this->name + ".cxi"), fs::current_path());
             
+            std::vector<std::string> rebuild_cia = {makerom.string(),
+                                                    "-f", "cia",
+                                                    "-o", out_cia.string(),
+                                                    "-content", content_path_rel.string() + ":0:0x00",
+                                                    "-major", std::to_string(this->version.major),
+                                                    "-minor", std::to_string(this->version.minor),
+                                                    "-micro", std::to_string(this->version.micro)};
+            if (sp::call(rebuild_cia))
+                return 1;
             
+            return 0;
         }
 
 };
 
 int check_requirements(std::vector<fs::path> reqs)
 {
+    uint8_t err_count = 0;
     for (fs::path const& path : reqs) {
-        if (!fs::exists(path))
-            std::cout << "ERROR: " << path.filename() << " is missing!\n";
-            return 1;
+        if (!fs::exists(path)){
+            std::cerr << "ERROR: " << path.filename() << " is missing!\n";
+            err_count = err_count + 1;
+        }
     }
+    if (err_count > 0){
+        return 1;
+    }
+    return 0;
+}
+
+int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace, bool &verbose)
+{
+    try
+    {
+        TCLAP::CmdLine cmd("nsui_banner_fixer does stuff", ' ', "1.4");
+        TCLAP::UnlabeledValueArg<std::string> ciaArg("cia", "The .cia file to be fixed.", false, "", "string", cmd);
+        TCLAP::SwitchArg replaceArg("r", "replace", "Set this flag to fix the .cia file(s) instead of saving the fixed copy in /out", cmd, false);
+        TCLAP::SwitchArg verboseArg("v", "verbose", "Set this flag to see more output as the program is working.", cmd, false);
+        cmd.parse(argc, argv);
+
+        if (ciaArg.getValue() != ""){
+            if (!ciaArg.getValue().ends_with(".cia"))
+                return 1;
+            if (!fs::exists(fs::absolute(fs::path(ciaArg.getValue()))))
+                return 1;
+            cias.push_back(fs::absolute(fs::path(ciaArg.getValue())));
+        }
+        else {
+            for (auto const& dir_entry : fs::directory_iterator(fs::current_path())){
+                if (dir_entry.path().extension().string() == ".cia")
+                    cias.push_back(fs::absolute(dir_entry.path()));
+            }
+        }
+
+        replace = replaceArg.getValue();
+        verbose = verboseArg.getValue();
+        
+    }
+    catch(TCLAP::ArgException &e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
     return 0;
 }
 
@@ -228,45 +296,34 @@ int main(int argc, char* argv[])
     ctrtool = exe.parent_path() / ctrtool;
     makerom = exe.parent_path() / makerom;
 
-    std::string a = "EUR_EN";
-    std::string c = "X";
-    char b[6] = {'E', 'U', 'R', '_', 'E', 'N'};
-    std::cout << a << " " << sizeof(a) << std::endl;
-    std::cout << a[0] << " " << sizeof(a[0]) << std::endl;
-    std::cout << a.substr(0, 4) << " " << sizeof(a.substr(0, 4)) << std::endl;
-    std::cout << a.data() << " " << sizeof(a.data()) << std::endl;
-    std::cout << b << " " << sizeof(b) << std::endl;
-    //char j[6];
-    //strncpy(j, locale_codes[3], 6);
-    //std::cout << j << " " << sizeof(j) << std::endl;
-
-    std::fstream file;
-    file.open("test.txt", std::fstream::in | std::fstream::out | std::fstream::binary);
-    if (file.is_open())
-    {
-        file.seekg(3, std::fstream::beg);
-        char buf[20];
-        file.read(buf, 1);
-        std::cout << std::endl << buf << std::endl;
-        file.seekg(0, std::fstream::beg);
-        file.write(locale_codes[4].c_str(), sizeof(locale_codes[4]));
-        file.seekg(0, std::fstream::beg);
-        file.read(buf, 10);
-        std::cout << std::endl << buf << std::endl;
-        
-    }
-    std::cout << "argv[0]: " << argv[0] << "\n";
-    std::cout << "cwd: " << fs::current_path() << "\n";
-    if (!check_requirements(std::vector<fs::path>{dstool, ctrtool, makerom}))
+    if (check_requirements(std::vector<fs::path>{dstool, ctrtool, makerom})){
+        std::cerr << "ERROR: requirements are missing!\n";
         return 1;
-    
+    }
+        
     bool replace = false;
     bool verbose = false;
-    std::cout << "pre init game\n";
-    Game test = Game(fs::path("D:/Documents/VS Code/nsui_banner_fixer/cpp/src/Castlevania Aria of Sorrow.cia"));
-    test.fix_banner();
+    std::vector<fs::path> cia_paths;
+
+    if (parse_args(argc, argv, cia_paths, replace, verbose)){
+        std::cerr << "ERROR: there was something wrong with the supplied arguments!\n";
+        return 1;
+    }
+
+    if (cia_paths.size() == 0){
+        
+    }
+
+    for (auto const& path : cia_paths){
+        std::cout << path.string();
+        Game(path).fix_banner(replace, verbose);
+    }
+
+    //std::cout << "pre init game\n";
+    //Game test = Game(fs::path("D:/Documents/VS Code/nsui_banner_fixer/cpp/src/Castlevania Aria of Sorrow.cia"));
+    //test.fix_banner();
     
-    std::vector<Game> cias;
+    //std::vector<Game> cias;
     //parseArgs(&cias, &replace, &verbose);
     
     return 0;
