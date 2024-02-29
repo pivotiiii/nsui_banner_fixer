@@ -8,13 +8,6 @@
 #include <tclap/Cmdline.h>
 #include <subprocess.hpp>
 
-//subprocess.hpp defines these for some reason, which breaks fstream.open() etc ._.
-#ifdef open
-#undef open
-#undef close
-#undef fileno
-#endif
-
 namespace fs = std::filesystem;
 namespace sp = subprocess;
 
@@ -254,9 +247,9 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace
 {
     try
     {
-        TCLAP::CmdLine cmd("nsui_banner_fixer does stuff", ' ', "1.4");
-        TCLAP::UnlabeledValueArg<std::string> ciaArg("cia", "The .cia file to be fixed.", false, "", "string", cmd);
-        TCLAP::SwitchArg replaceArg("r", "replace", "Set this flag to fix the .cia file(s) instead of saving the fixed copy in /out", cmd, false);
+        TCLAP::CmdLine cmd("Either supply a .cia file as an argument or place all the files you want to convert in your current working directory.", ' ', "1.4", false);
+        TCLAP::UnlabeledValueArg<std::string> ciaArg("file.cia", "The .cia file to be fixed.", false, "", "path", cmd);
+        TCLAP::SwitchArg replaceArg("r", "replace", "Set this flag to fix the .cia file(s) directly instead of saving a fixed copy in /out", cmd, false);
         TCLAP::SwitchArg verboseArg("v", "verbose", "Set this flag to see more output as the program is working.", cmd, false);
         cmd.parse(argc, argv);
 
@@ -272,6 +265,9 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace
                 if (dir_entry.path().extension().string() == ".cia")
                     cias.push_back(fs::absolute(dir_entry.path()));
             }
+        }
+        if (cias.size() == 0){
+            TCLAP::StdOutput().usage(cmd);
         }
 
         replace = replaceArg.getValue();

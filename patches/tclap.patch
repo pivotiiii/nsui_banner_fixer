@@ -1,0 +1,33 @@
+diff --git a/include/tclap/CmdLine.h b/include/tclap/CmdLine.h
+index d75a944..c9e6177 100644
+--- a/include/tclap/CmdLine.h
++++ b/include/tclap/CmdLine.h
+@@ -346,17 +346,18 @@ inline void CmdLine::_constructor() {
+     _autoArgs.setParser(*this);
+     // add(_autoArgs);
+ 
+-    v = new IgnoreRestVisitor(*this);
+-    SwitchArg *ignore = new SwitchArg(
+-        Arg::flagStartString(), Arg::ignoreNameString(),
+-        "Ignores the rest of the labeled arguments following this flag.", false,
+-        v);
+-    _deleteOnExit(ignore);
+-    _deleteOnExit(v);
+-    _autoArgs.add(ignore);
+-    addToArgList(ignore);
+-
+     if (_helpAndVersion) {
++        v = new IgnoreRestVisitor(*this);
++        SwitchArg *ignore = new SwitchArg(
++            Arg::flagStartString(), Arg::ignoreNameString(),
++            "Ignores the rest of the labeled arguments following this flag.", false,
++            v);
++        _deleteOnExit(ignore);
++        _deleteOnExit(v);
++        _autoArgs.add(ignore);
++        addToArgList(ignore);
++
++    
+         v = new HelpVisitor(this, &_output);
+         SwitchArg *help = new SwitchArg(
+             "h", "help", "Displays usage information and exits.", false, v);

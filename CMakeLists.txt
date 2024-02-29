@@ -14,13 +14,17 @@ target_compile_features(nsui_banner_fixer PUBLIC cxx_std_20)
 include(FetchContent)
 FetchContent_Declare(
     tclap
-    GIT_REPOSITORY  https://github.com/mirror/tclap.git
-    GIT_TAG         799a8b1f99818e39fee19d0601030770af1221e1 #v1.4.0-rc1
+    GIT_REPOSITORY      https://github.com/mirror/tclap.git
+    GIT_TAG             799a8b1f99818e39fee19d0601030770af1221e1 #v1.4.0-rc1
+    PATCH_COMMAND       git apply "${CMAKE_SOURCE_DIR}/patches/tclap.patch"
+    UPDATE_DISCONNECTED 1
 )
 FetchContent_Declare(
     subprocess
-    GIT_REPOSITORY  https://github.com/arun11299/cpp-subprocess.git
-    GIT_TAG         40cd59c0970960a0ef41365ae9d96c6a72ee6922 #
+    GIT_REPOSITORY      https://github.com/arun11299/cpp-subprocess.git
+    GIT_TAG             40cd59c0970960a0ef41365ae9d96c6a72ee6922 #
+    PATCH_COMMAND       git apply "${CMAKE_SOURCE_DIR}/patches/subprocess.patch"
+    UPDATE_DISCONNECTED 1
 )
 FetchContent_MakeAvailable(tclap subprocess)
 
