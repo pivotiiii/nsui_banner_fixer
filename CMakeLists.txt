@@ -8,7 +8,7 @@ project(
 include(CTest)
 enable_testing()
 
-add_executable(nsui_banner_fixer src/nsui_banner_fixer.cpp)
+add_executable(nsui_banner_fixer src/nsui_banner_fixer.cpp src/Game.cpp)
 target_compile_features(nsui_banner_fixer PUBLIC cxx_std_20)
 
 include(FetchContent)
