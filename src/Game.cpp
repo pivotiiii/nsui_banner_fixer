@@ -26,11 +26,19 @@ Game::~Game()
     fs::remove_all(this->cwd.parent_path());
 }
 
-int Game::fix_banner(bool replace = false, bool verbose = false)
+int Game::fix_banner(bool replace = false, bool verbose = false, bool quiet = false)
 {
+    if (!quiet)
+        std::cout << "--- " << this->cia_path.string() << "\n--- extracting cia\n";
     this->extract_cia(verbose);
+    if (!quiet)
+        std::cout << "--- editing banner\n";
     this->edit_bcmdl(verbose);
+    if (!quiet)
+        std::cout << "--- repacking cia\n";
     this->repack_cia(replace, verbose);
+    if (!quiet)
+        std::cout << "--- done\n";
     return 0;
 }
 
@@ -65,34 +73,36 @@ int Game::extract_cia(bool verbose = false)
     std::vector<std::string> extract_contents = {ctrtool.string(),
                                                  std::string("--contents=") + (this->cwd / "contents").string(),
                                                  this->cia_path.string()};
-    for (auto i : extract_contents)
-        std::cout << i << " ";
     if (sp::call(extract_contents))
         return 1;
 
-    if (sp::call({dstool.string(),
-                  "-x", "-t",
-                  "cxi", "-f", (this->cwd / "contents.0000.00000000").string(),
-                  "--header", (this->cwd / "ncch.header").string(),
-                  "--exh", (this->cwd / "exheader.bin").string(),
-                  "--exefs", (this->cwd / "exefs.bin").string(),
-                  "--romfs", (this->cwd / "romfs.bin").string()}))
+    std::vector<std::string> split_contents = {dstool.string(),
+                                               "-x", "-t",
+                                               "cxi", "-f", (this->cwd / "contents.0000.00000000").string(),
+                                               "--header", (this->cwd / "ncch.header").string(),
+                                               "--exh", (this->cwd / "exheader.bin").string(),
+                                               "--exefs", (this->cwd / "exefs.bin").string(),
+                                               "--romfs", (this->cwd / "romfs.bin").string()};
+    if (sp::call(split_contents))
         return 1;
 
-    if (sp::call({dstool.string(),
-                  "-x", "-t",
-                  "exefs", "-f", (this->cwd / "exefs.bin").string(),
-                  "--header", (this->cwd / "exefs.header").string(),
-                  "--exefs-dir", (this->cwd / "exefs").string()}))
+    std::vector<std::string> extract_exefs = {dstool.string(),
+                                              "-x", "-t",
+                                              "exefs", "-f", (this->cwd / "exefs.bin").string(),
+                                              "--header", (this->cwd / "exefs.header").string(),
+                                              "--exefs-dir", (this->cwd / "exefs").string()};
+    if (sp::call(extract_exefs))
         return 1;
 
     fs::create_directory(this->cwd / "banner");
     if (fs::exists(this->cwd / "exefs" / "banner.bnr"))
         this->banner_ext = "bnr";
-    if (sp::call({dstool.string(),
-                  "-x", "-t",
-                  "banner", "-f", (this->cwd / "exefs" / (std::string("banner.") + this->banner_ext)).string(),
-                  "--banner-dir", (this->cwd / "banner").string()}))
+
+    std::vector<std::string> extract_banner = {dstool.string(),
+                                               "-x", "-t",
+                                               "banner", "-f", (this->cwd / "exefs" / (std::string("banner.") + this->banner_ext)).string(),
+                                               "--banner-dir", (this->cwd / "banner").string()};
+    if (sp::call(extract_banner))
         return 1;
 
     return 0;
@@ -147,6 +157,7 @@ int Game::repack_cia(bool replace = false, bool verbose = false)
                                             "--romfs", (this->cwd / "romfs.bin").string()};
     if (sp::call(rebuild_cxi))
         return 1;
+
     fs::path out_cia;
     if (replace) {
         out_cia = this->cia_path;

@@ -13,7 +13,7 @@ class Game {
   public:
     Game(std::filesystem::path cia);
     ~Game();
-    int fix_banner(bool replace, bool verbose);
+    int fix_banner(bool replace, bool verbose, bool quiet);
 
   private:
     std::filesystem::path cia_path;

@@ -28,13 +28,14 @@ int check_requirements(std::vector<fs::path> reqs)
     return 0;
 }
 
-int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace, bool &verbose)
+int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace, bool &verbose, bool &quiet)
 {
     try {
         TCLAP::CmdLine cmd("Either supply a .cia file as an argument or place all the files you want to convert in your current working directory.", ' ', "1.4", false);
         TCLAP::UnlabeledValueArg<std::string> ciaArg("file.cia", "The .cia file to be fixed.", false, "", "path", cmd);
         TCLAP::SwitchArg replaceArg("r", "replace", "Set this flag to fix the .cia file(s) directly instead of saving a fixed copy in /out", cmd, false);
         TCLAP::SwitchArg verboseArg("v", "verbose", "Set this flag to see more output as the program is working.", cmd, false);
+        TCLAP::SwitchArg quietArg("q", "quiet", "Set this flag to silence any non error output.", cmd, false);
         cmd.parse(argc, argv);
 
         if (ciaArg.getValue() != "") {
@@ -51,10 +52,12 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace
         }
         if (cias.size() == 0) {
             TCLAP::StdOutput().usage(cmd);
+            return 1;
         }
 
         replace = replaceArg.getValue();
         verbose = verboseArg.getValue();
+        quiet = quietArg.getValue();
 
     } catch (TCLAP::ArgException &e) {
         std::cerr << e.what() << '\n';
@@ -66,9 +69,6 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace
 int main(int argc, char* argv[])
 {
     const fs::path exe = argv[0];
-    // const fs::path dstool = exe.parent_path() / "tools" / "3dstool.exe";
-    // const fs::path ctrtool = exe.parent_path() / "tools" / "ctrtool.exe";
-    // const fs::path makerom = exe.parent_path() / "tools" / "makerom.exe";
     dstool = exe.parent_path() / dstool;
     ctrtool = exe.parent_path() / ctrtool;
     makerom = exe.parent_path() / makerom;
@@ -80,27 +80,17 @@ int main(int argc, char* argv[])
 
     bool replace = false;
     bool verbose = false;
+    bool quiet = false;
     std::vector<fs::path> cia_paths;
 
-    if (parse_args(argc, argv, cia_paths, replace, verbose)) {
+    if (parse_args(argc, argv, cia_paths, replace, verbose, quiet)) {
         std::cerr << "ERROR: there was something wrong with the supplied arguments!\n";
         return 1;
     }
 
-    if (cia_paths.size() == 0) {
-    }
-
     for (const auto &path : cia_paths) {
-        std::cout << path.string();
-        Game(path).fix_banner(replace, verbose);
+        Game(path).fix_banner(replace, verbose, quiet);
     }
-
-    // std::cout << "pre init game\n";
-    // Game test = Game(fs::path("D:/Documents/VS Code/nsui_banner_fixer/cpp/src/Castlevania Aria of Sorrow.cia"));
-    // test.fix_banner();
-
-    // std::vector<Game> cias;
-    // parseArgs(&cias, &replace, &verbose);
 
     return 0;
 }
