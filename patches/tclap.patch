@@ -1,3 +1,53 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c2c9a26..fd8f952 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,10 +4,12 @@ project(TCLAP VERSION 1.4.0 LANGUAGES CXX)
+ 
+ set(CMAKE_CXX_STANDARD 98)
+ set(CMAKE_CXX_STANDARD_REQUIRED True)
+-add_definitions(-DHAVE_TCLAP_CONFIG_H)
+ 
+-enable_testing()
+-include(CTest)
++option(TCLAP_TESTS "enable tclap tests" OFF)
++option(TCLAP_EXAMPLES "enable tclap examples" OFF)
++option(TCLAP_DOCS "enable tclap documentation" OFF)
++
++add_definitions(-DHAVE_TCLAP_CONFIG_H)
+ 
+ include(CheckCXXSourceCompiles)
+ check_cxx_source_compiles("#include <strstream>
+@@ -20,12 +22,20 @@ configure_file(config.h.in tclap/TCLAPConfig.h)
+ 
+ add_library(TCLAP INTERFACE)
+ target_include_directories(TCLAP INTERFACE include/)
+-install(TARGETS TCLAP DESTINATION include)
+-install(FILES "${PROJECT_BINARY_DIR}/tclap/TCLAPConfig.h"
+-  DESTINATION include/tclap
+-  )
+-
+-add_subdirectory(docs)
+-add_subdirectory(examples)
+-add_subdirectory(tests)
+-add_subdirectory(include/tclap)
++#install(TARGETS TCLAP DESTINATION include)
++#install(FILES "${PROJECT_BINARY_DIR}/tclap/TCLAPConfig.h"
++#  DESTINATION include/tclap
++#  )
++
++if(TCLAP_DOCS)
++	add_subdirectory(docs)
++endif()
++if(TCLAP_EXAMPLES)
++	add_subdirectory(examples)
++endif()
++if(TCLAP_TESTS)
++	enable_testing()
++	include(CTest)
++	add_subdirectory(tests)
++endif()
++#add_subdirectory(include/tclap)
 diff --git a/include/tclap/CmdLine.h b/include/tclap/CmdLine.h
 index d75a944..c9e6177 100644
 --- a/include/tclap/CmdLine.h

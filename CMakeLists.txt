@@ -5,11 +5,13 @@ project(
     DESCRIPTION "Fixes banners for GBA forwarders generated with NSUIv28 on non-US consoles."
     LANGUAGES CXX)
 
-include(CTest)
-enable_testing()
-
 add_executable(nsui_banner_fixer src/nsui_banner_fixer.cpp src/Game.cpp)
 target_compile_features(nsui_banner_fixer PUBLIC cxx_std_20)
+
+#include(CTest)
+enable_testing()
+
+#----------------------------------------------------------------------------------------
 
 include(FetchContent)
 FetchContent_Declare(
@@ -27,28 +29,59 @@ FetchContent_Declare(
     UPDATE_DISCONNECTED 1
 )
 FetchContent_MakeAvailable(tclap subprocess)
+target_link_libraries(nsui_banner_fixer TCLAP subprocess)
 
-include_directories("${tclap_SOURCE_DIR}/include")
-include_directories("${subprocess_SOURCE_DIR}")
+#----------------------------------------------------------------------------------------
+
+FetchContent_Populate(
+    3dstool
+    URL         https://github.com/dnasdw/3dstool/releases/download/v1.0.9/3dstool.zip
+    SOURCE_DIR  tools/3dstool
+)
 
 add_custom_command(
     TARGET nsui_banner_fixer POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_SOURCE_DIR}/src/tools/3dstool.exe
+            ${CMAKE_SOURCE_DIR}/build/tools/3dstool/3dstool.exe
             $<TARGET_FILE_DIR:nsui_banner_fixer>/tools/3dstool.exe)
 
+FetchContent_Populate(
+    ctrtool
+    URL         https://github.com/3DSGuy/Project_CTR/releases/download/ctrtool-v0.5/ctrtool-win_x86_64-v0.5.zip
+    SOURCE_DIR  tools/ctrtool
+)
+
 add_custom_command(
-    TARGET nsui_banner_fixer POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_SOURCE_DIR}/src/tools/ctrtool.exe
+    TARGET nsui_banner_fixer POST_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E copy 
+            ${CMAKE_SOURCE_DIR}/build/tools/ctrtool/ctrtool.exe 
             $<TARGET_FILE_DIR:nsui_banner_fixer>/tools/ctrtool.exe)
 
+FetchContent_Populate(
+    makerom
+    URL         https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.15/makerom-win_x86_64-v0.15.zip
+    SOURCE_DIR  tools/makerom
+)
+
 add_custom_command(
     TARGET nsui_banner_fixer POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_SOURCE_DIR}/src/tools/makerom.exe
+            ${CMAKE_SOURCE_DIR}/build/tools/makerom/makerom.exe
             $<TARGET_FILE_DIR:nsui_banner_fixer>/tools/makerom.exe)
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPACK)
+#----------------------------------------------------------------------------------------
+
+install(TARGETS nsui_banner_fixer DESTINATION .)
+install(FILES "${CMAKE_SOURCE_DIR}/build/tools/3dstool/3dstool.exe" DESTINATION tools)
+install(FILES "${CMAKE_SOURCE_DIR}/build/tools/ctrtool/ctrtool.exe" DESTINATION tools)
+install(FILES "${CMAKE_SOURCE_DIR}/build/tools/makerom/makerom.exe" DESTINATION tools)
+
+set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
+set(CPACK_PACKAGE_VERSION_MAJOR "${nsui_banner_fixer_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${nsui_banner_fixer_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_MICRO "${nsui_banner_fixer_VERSION_MICRO}")
+set(CPACK_SOURCE_GENERATOR "TGZ")
+set(CPACK_NSIS OFF)
+set(CPACK_SOURCE_ZIP OFF)
+include(CPack)
+#in build/ : cpack -G ZIP -C Release
