@@ -72,7 +72,6 @@ int main(int argc, char* argv[])
     dstool = exe.parent_path() / dstool;
     ctrtool = exe.parent_path() / ctrtool;
     makerom = exe.parent_path() / makerom;
-
     if (check_requirements(std::vector<fs::path> {dstool, ctrtool, makerom})) {
         std::cerr << "ERROR: requirements are missing!\n";
         return 1;
