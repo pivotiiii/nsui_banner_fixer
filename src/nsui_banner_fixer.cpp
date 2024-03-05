@@ -3,12 +3,16 @@
 #include <iostream>
 #include <regex>
 #include <subprocess.hpp>
-#include <tclap/Cmdline.h>
+#include <tclap/CmdLine.h>
 #include <vector>
 
 #include "Game.hpp"
+#include "Settings.hpp"
 #include "globals.hpp"
 #include "nsui_banner_fixer.hpp"
+
+// #include "3dstool.h"
+#include "utility.h"
 
 namespace fs = std::filesystem;
 namespace sp = subprocess;
@@ -65,17 +69,23 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace
 
     return 0;
 }
-
+int main_3dstool(int argc, char* argv[]);
 int main(int argc, char* argv[])
 {
+    // C3dsTool var3dstool;
+    main_3dstool(argc, argv);
+
     const fs::path exe = argv[0];
     dstool = exe.parent_path() / dstool;
-    ctrtool = exe.parent_path() / ctrtool;
+    ctrtoolX = exe.parent_path() / ctrtoolX;
     makerom = exe.parent_path() / makerom;
-    if (check_requirements(std::vector<fs::path> {dstool, ctrtool, makerom})) {
+    if (check_requirements(std::vector<fs::path> {dstool, ctrtoolX, makerom})) {
         std::cerr << "ERROR: requirements are missing!\n";
         return 1;
     }
+
+    Settings set;
+    set.bin = argv[0];
 
     bool replace = false;
     bool verbose = false;
@@ -86,9 +96,12 @@ int main(int argc, char* argv[])
         std::cerr << "ERROR: there was something wrong with the supplied arguments!\n";
         return 1;
     }
+    set.replace = replace;
+    set.verbose = verbose;
+    set.quiet = quiet;
 
     for (const auto &path : cia_paths) {
-        Game(path).fix_banner(replace, verbose, quiet);
+        Game(path, set).fix_banner();
     }
 
     return 0;

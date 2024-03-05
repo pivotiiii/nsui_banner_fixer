@@ -30,6 +30,8 @@ dist
 disto
 *Kopie*
 build
+buildWSL
+buildWIN
 bannertool*
 makerom*
 venv

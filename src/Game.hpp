@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "Settings.hpp"
 #include <filesystem>
 
 typedef struct versionS {
@@ -11,9 +12,9 @@ typedef struct versionS {
 
 class Game {
   public:
-    Game(std::filesystem::path cia);
+    Game(std::filesystem::path cia, Settings set);
     ~Game();
-    int fix_banner(bool replace, bool verbose, bool quiet);
+    int fix_banner();
 
   private:
     std::filesystem::path cia_path;
@@ -21,11 +22,12 @@ class Game {
     std::string name;
     std::string banner_ext;
     versionS version;
+    Settings set;
 
     versionS get_version();
-    int extract_cia(bool verbose);
-    int edit_bcmdl(bool verbose);
-    int repack_cia(bool replace, bool verbose);
+    int extract_cia();
+    int edit_bcmdl();
+    int repack_cia();
 };
 
 #endif

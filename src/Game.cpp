@@ -8,10 +8,12 @@
 #include "Game.hpp"
 #include "globals.hpp"
 
+#include "Ctrtool_cia_proc.hpp"
+
 namespace fs = std::filesystem;
 namespace sp = subprocess;
 
-Game::Game(fs::path cia) // : cia_path(cia)
+Game::Game(fs::path cia, Settings sets) // : cia_path(cia)
 {
     this->cia_path = cia;
     this->name = cia_path.stem().string();
@@ -19,6 +21,7 @@ Game::Game(fs::path cia) // : cia_path(cia)
     this->version = this->get_version();
     this->cwd = fs::current_path() / "temp" / this->name;
     fs::create_directories(this->cwd);
+    this->set = sets;
 }
 
 Game::~Game()
@@ -26,18 +29,18 @@ Game::~Game()
     fs::remove_all(this->cwd.parent_path());
 }
 
-int Game::fix_banner(bool replace = false, bool verbose = false, bool quiet = false)
+int Game::fix_banner()
 {
-    if (!quiet)
+    if (!this->set.quiet)
         std::cout << "--- " << this->cia_path.string() << "\n--- extracting cia\n";
-    this->extract_cia(verbose);
-    if (!quiet)
+    this->extract_cia();
+    if (!this->set.quiet)
         std::cout << "--- editing banner\n";
-    this->edit_bcmdl(verbose);
-    if (!quiet)
+    this->edit_bcmdl();
+    if (!this->set.quiet)
         std::cout << "--- repacking cia\n";
-    this->repack_cia(replace, verbose);
-    if (!quiet)
+    this->repack_cia();
+    if (!this->set.quiet)
         std::cout << "--- done\n";
     return 0;
 }
@@ -45,32 +48,41 @@ int Game::fix_banner(bool replace = false, bool verbose = false, bool quiet = fa
 versionS Game::get_version()
 {
     versionS version;
+    std::vector<std::string> args = {"/mnt/d/Documents/VS Code/nsui_banner_fixer/cpp/build/nsui_banner_fixer", "-i", "/mnt/d/Documents/VS Code/nsui_banner_fixer/cpp/src/Castlevania Aria of Sorrow.cia"};
+    Ctrtool_cia_proc proc = Ctrtool_cia_proc(args);
+    proc.run(true);
+    std::vector<std::string> output = proc.get_output_lines();
 
-    auto output_buffer = sp::check_output({"D:/Documents/VS Code/nsui_banner_fixer/cpp/src/tools/ctrtool.exe", "-i", this->cia_path.string()});
-    if (output_buffer.buf.data() != NULL) {
-        std::stringstream ss(output_buffer.buf.data());
-        std::string line;
-        while (std::getline(ss, line, '\n')) {
-            if (line.starts_with("Title version:")) {
-                std::regex version_regex("(\\d+).(\\d+).(\\d+)");
-                std::smatch matches;
-                if (std::regex_search(line, matches, version_regex)) {
-                    if (matches.size() == 4) {
-                        version.major = max(min(63, stoi(matches[1].str())), 0);
-                        version.minor = max(min(63, stoi(matches[2].str())), 0);
-                        version.micro = max(min(15, stoi(matches[3].str())), 0);
-                    }
+    for (auto line : output) {
+        if (line.starts_with("|- TitleVersion:")) {
+            std::regex version_regex("(\\d+).(\\d+).(\\d+)");
+            std::smatch matches;
+            if (std::regex_search(line, matches, version_regex)) {
+                if (matches.size() == 4) {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+                    version.major = max(min(63, stoi(matches[1].str())), 0);
+                    version.minor = max(min(63, stoi(matches[2].str())), 0);
+                    version.micro = max(min(15, stoi(matches[3].str())), 0);
+#else
+                    version.major = std::max(std::min(63, stoi(matches[1].str())), 0);
+                    version.minor = std::max(std::min(63, stoi(matches[2].str())), 0);
+                    version.micro = std::max(std::min(15, stoi(matches[3].str())), 0);
+#endif
                 }
-                break;
             }
+            break;
         }
     }
+    if (this->set.verbose) {
+        std::cout << "Detected version: " << version.major << "." << version.minor << "." << version.micro << "\n";
+    }
+
     return version;
 }
 
-int Game::extract_cia(bool verbose = false)
+int Game::extract_cia()
 {
-    std::vector<std::string> extract_contents = {ctrtool.string(),
+    std::vector<std::string> extract_contents = {ctrtoolX.string(),
                                                  std::string("--contents=") + (this->cwd / "contents").string(),
                                                  this->cia_path.string()};
     if (sp::call(extract_contents))
@@ -108,7 +120,7 @@ int Game::extract_cia(bool verbose = false)
     return 0;
 }
 
-int Game::edit_bcmdl(bool verbose = false)
+int Game::edit_bcmdl()
 {
     for (int i = 1; i < 14; i++) {
         std::fstream file;
@@ -130,7 +142,7 @@ int Game::edit_bcmdl(bool verbose = false)
     return 0;
 }
 
-int Game::repack_cia(bool replace = false, bool verbose = false)
+int Game::repack_cia()
 {
     fs::remove(this->cwd / "exefs" / (std::string("banner.") + this->banner_ext));
     std::vector<std::string> rebuild_banner = {dstool.string(),
@@ -159,7 +171,7 @@ int Game::repack_cia(bool replace = false, bool verbose = false)
         return 1;
 
     fs::path out_cia;
-    if (replace) {
+    if (this->set.replace) {
         out_cia = this->cia_path;
     } else {
         fs::path out_dir = this->cwd.parent_path().parent_path() / "out";
