@@ -12,17 +12,17 @@ typedef struct versionS {
 
 class Game {
   public:
-    Game(std::filesystem::path cia, Settings set);
+    Game(const std::filesystem::path &cia, const Settings &set);
     ~Game();
     int fix_banner();
 
   private:
-    std::filesystem::path cia_path;
-    std::filesystem::path cwd;
-    std::string name;
+    const std::filesystem::path cia_path;
+    const std::filesystem::path cwd;
+    const std::string name;
     std::string banner_ext;
     versionS version;
-    Settings set;
+    const Settings set;
 
     versionS get_version();
     int extract_cia();

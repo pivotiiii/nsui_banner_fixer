@@ -5,7 +5,10 @@ project(
     DESCRIPTION "Fixes banners for GBA forwarders generated with NSUIv28 on non-US consoles."
     LANGUAGES CXX C)
 
-add_executable(${PROJECT_NAME} src/nsui_banner_fixer.cpp src/Game.cpp src/Ctrtool_cia_proc.cpp)
+add_executable(${PROJECT_NAME} 
+    src/nsui_banner_fixer.cpp 
+    src/Game.cpp 
+    src/Tool.cpp)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 option(DYNAMIC_LINKING "Link CURL and OPENSSL dynamic instead of static. (Linux only)" OFF)
@@ -196,9 +199,16 @@ endif()
 FetchContent_Declare(
     project_ctr_download
     GIT_REPOSITORY      https://github.com/3DSGuy/Project_CTR.git
-    GIT_TAG master
+    GIT_TAG             master
+    GIT_PROGRESS        TRUE
+    PATCH_COMMAND       git apply "${CMAKE_CURRENT_SOURCE_DIR}/patches/ctr.patch"
+    UPDATE_DISCONNECTED 1
 )
 FetchContent_MakeAvailable(project_ctr_download)
+
+#----------------------------------------------------------------------------------------
+# CTRTool
+#----------------------------------------------------------------------------------------
 
 FILE(
     COPY ${project_ctr_download_SOURCE_DIR}/ctrtool/src/ 
@@ -234,6 +244,47 @@ if (LINUX)
     target_link_libraries(libtoolchain INTERFACE libmbedtls)
 endif()
 target_link_libraries(${PROJECT_NAME} PUBLIC ctrtool_lib)
+
+#----------------------------------------------------------------------------------------
+# makerom
+#----------------------------------------------------------------------------------------
+
+FILE(
+    COPY ${project_ctr_download_SOURCE_DIR}/makerom/src/ 
+    DESTINATION ${project_ctr_download_SOURCE_DIR}/include/makerom
+    FILES_MATCHING PATTERN "*.h")
+
+if (LINUX)
+    add_custom_command(
+        OUTPUT ${project_ctr_download_SOURCE_DIR}/makerom/bin/makerom.a
+        ${project_ctr_download_SOURCE_DIR}/makerom/deps/libblz/bin/libblz.a
+        ${project_ctr_download_SOURCE_DIR}/makerom/deps/libyaml/bin/libyaml.a
+        ${project_ctr_download_SOURCE_DIR}/makerom/deps/libmbedtls/bin/libmbedtls.a
+        COMMAND make -C ${project_ctr_download_SOURCE_DIR}/makerom deps static_lib
+        COMMENT "=================== running make on project_ctr/makerom ..."
+    )
+    add_custom_target(makerom_make ALL DEPENDS ${project_ctr_download_SOURCE_DIR}/makerom/bin/makerom.a)
+
+    add_library(makerom_lib STATIC IMPORTED)
+    add_dependencies(makerom_lib makerom_make)
+    target_include_directories(makerom_lib INTERFACE ${project_ctr_download_SOURCE_DIR}/include)
+    set_target_properties(makerom_lib PROPERTIES IMPORTED_LOCATION ${project_ctr_download_SOURCE_DIR}/makerom/bin/makerom.a)
+
+    set(makerom_deps libblz libyaml)
+    foreach(LIB IN LISTS makerom_deps)
+        add_library(${LIB} STATIC IMPORTED)
+        add_dependencies(${LIB} makerom_make)
+        target_include_directories(${LIB} INTERFACE ${project_ctr_download_SOURCE_DIR}/makerom/deps/${LIB}/include)
+        set_target_properties(${LIB} PROPERTIES IMPORTED_LOCATION ${project_ctr_download_SOURCE_DIR}/makerom/deps/${LIB}/bin/${LIB}.a)
+        target_link_libraries(makerom_lib INTERFACE ${LIB})
+    endforeach()
+    #target_link_libraries(libtoolchain INTERFACE libmbedtls)
+endif()
+target_link_libraries(${PROJECT_NAME} PUBLIC makerom_lib)
+
+
+
+
 
 #----------------------------------------------------------------------------------------
 

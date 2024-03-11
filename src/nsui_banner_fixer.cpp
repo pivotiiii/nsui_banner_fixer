@@ -9,10 +9,7 @@
 #include "Game.hpp"
 #include "Settings.hpp"
 #include "globals.hpp"
-#include "nsui_banner_fixer.hpp"
-
-// #include "3dstool.h"
-#include "utility.h"
+// #include "nsui_banner_fixer.hpp"
 
 namespace fs = std::filesystem;
 namespace sp = subprocess;
@@ -32,7 +29,7 @@ int check_requirements(std::vector<fs::path> reqs)
     return 0;
 }
 
-int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace, bool &verbose, bool &quiet)
+int parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &set)
 {
     try {
         TCLAP::CmdLine cmd("Either supply a .cia file as an argument or place all the files you want to convert in your current working directory.", ' ', "1.4", false);
@@ -59,9 +56,9 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace
             return 1;
         }
 
-        replace = replaceArg.getValue();
-        verbose = verboseArg.getValue();
-        quiet = quietArg.getValue();
+        set.replace = replaceArg.getValue();
+        set.verbose = verboseArg.getValue();
+        set.quiet = quietArg.getValue();
 
     } catch (TCLAP::ArgException &e) {
         std::cerr << e.what() << '\n';
@@ -69,12 +66,9 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace
 
     return 0;
 }
-int main_3dstool(int argc, char* argv[]);
+// int main_3dstool(int argc, char* argv[]);
 int main(int argc, char* argv[])
 {
-    // C3dsTool var3dstool;
-    main_3dstool(argc, argv);
-
     const fs::path exe = argv[0];
     dstool = exe.parent_path() / dstool;
     ctrtoolX = exe.parent_path() / ctrtoolX;
@@ -86,19 +80,14 @@ int main(int argc, char* argv[])
 
     Settings set;
     set.bin = argv[0];
+    set.cwd = fs::current_path();
 
-    bool replace = false;
-    bool verbose = false;
-    bool quiet = false;
     std::vector<fs::path> cia_paths;
 
-    if (parse_args(argc, argv, cia_paths, replace, verbose, quiet)) {
+    if (parse_args(argc, argv, cia_paths, set)) {
         std::cerr << "ERROR: there was something wrong with the supplied arguments!\n";
         return 1;
     }
-    set.replace = replace;
-    set.verbose = verbose;
-    set.quiet = quiet;
 
     for (const auto &path : cia_paths) {
         Game(path, set).fix_banner();

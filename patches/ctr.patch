@@ -1,21 +1,15 @@
-diff --git a/makefile b/makefile
-index 4cddd35..a278ef8 100644
---- a/makefile
-+++ b/makefile
-@@ -39,6 +39,9 @@ all: progs
- 	
- clean: clean_progs
+diff --git a/makerom/src/user_settings.h b/makerom/src/user_settings.h
+index e09ec50..a44a714 100644
+--- a/makerom/src/user_settings.h
++++ b/makerom/src/user_settings.h
+@@ -305,4 +305,7 @@ typedef struct
  
-+libs:
-+	@$(foreach prog,$(PROJECT_PROGRAM_LOCAL_DIR), cd "$(prog)" && $(MAKE) deps static_lib && cd "$(PROJECT_PATH)";)
-+
- # Programs
- .PHONY: progs
- progs:
-@@ -46,4 +49,4 @@ progs:
- 
- .PHONY: clean_progs
- clean_progs:
--	@$(foreach prog,$(PROJECT_PROGRAM_LOCAL_DIR), cd "$(prog)" && $(MAKE) clean_deps clean && cd "$(PROJECT_PATH)";)
+ void init_UserSettings(user_settings *set);
+ void free_UserSettings(user_settings *set);
+-int ParseArgs(int argc, char *argv[], user_settings *usr_settings);
 \ No newline at end of file
-+	@$(foreach prog,$(PROJECT_PROGRAM_LOCAL_DIR), cd "$(prog)" && $(MAKE) clean_deps clean && cd "$(PROJECT_PATH)";)
++int ParseArgs(int argc, char *argv[], user_settings *usr_settings);
++void SetDefaults(user_settings* set);
++int CheckArgumentCombination(user_settings* set);
++int SetKeys(keys_struct* keys);
+\ No newline at end of file
