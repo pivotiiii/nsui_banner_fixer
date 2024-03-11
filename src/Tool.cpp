@@ -1,27 +1,24 @@
 #include "Tool.hpp"
 
-#include <exefs.h>
 #include <iostream>
 #include <regex>
 
-#include <banner.h>
+#include <stdcapture/stdcapture.h>
+// ctrtool
 #include <ctrtool/CiaProcess.h>
 #include <ctrtool/Settings.h>
-
-// #include <libyaml/yaml.h>
+// 3dstool
+#include <banner.h>
+#include <exefs.h>
+#include <ncch.h>
+// makerom
 extern "C" {
 #include <makerom/lib.h>
-}
-
-extern "C" {
+// makerom/lib.h has to be imported first, all the other makerom headers depend on it but don't always import
 #include <makerom/cia_build.h>
 #include <makerom/ncch_build.h>
-#include <makerom/ncsd_build.h>
 #include <makerom/user_settings.h>
-#include <makerom/utils.h>
 }
-#include <ncch.h>
-#include <stdcapture/stdcapture.h>
 
 #define capture_output(x, y)                                                     \
     {                                                                            \
@@ -39,9 +36,20 @@ extern "C" {
         }                                                                        \
     }
 
-// void SetDefaults(user_settings* set);
-// int CheckArgumentCombination(user_settings* set);
-// int SetKeys(keys_struct* keys);
+#define capture_output_and_errors(x, y)                                          \
+    {                                                                            \
+        std::stringstream captured2;                                             \
+        {                                                                        \
+            std::capture::CaptureStderr cap([&](const char* buf, size_t szbuf) { \
+                captured2 << std::string(buf, szbuf);                            \
+            });                                                                  \
+            capture_output(x, y);                                                \
+        }                                                                        \
+        std::string line;                                                        \
+        while (std::getline(captured2, line)) {                                  \
+            y.push_back(line);                                                   \
+        }                                                                        \
+    }
 
 namespace fs = std::filesystem;
 
@@ -139,12 +147,23 @@ versionS CTR::get_cia_version()
     return version;
 }
 
-int CTR::extract_cia_contents()
+bool CTR::extract_cia_contents()
 {
+    if (set.verbose) {
+        std::cout << "----- extracting cia contents\n";
+    }
     const std::vector<std::string> call_args = {std::string("--contents=") + (cwd / "contents").string(), cia.string()};
     ctrtool::CiaProcess proc = setup_cia_process(call_args);
     capture_output(proc.process(), output_lines);
-    return 0;
+    if (set.verbose) {
+        for (const auto &line : output_lines) {
+            std::cout << line << "\n";
+        }
+    }
+    if (set.verbose) {
+        std::cout << "----- extracting cia contents done\n";
+    }
+    return true;
 }
 
 DS::DS(const std::string &name, const fs::path &cwd, const Settings &set)
@@ -187,8 +206,11 @@ int DS::run_3dstool(const std::vector<std::string> &args)
 
 bool DS::split_contents()
 {
+    if (set.verbose) {
+        std::cout << "----- splitting contents\n";
+    }
+    bool result;
     std::filesystem::path contents = cwd / "contents.0000.00000000";
-    std::cout << "ds.split_contents cwd: " << cwd.string() << "\n";
     if (std::filesystem::exists(contents)) {
         CNcch ncch;
         ncch.SetFileName(contents.string());
@@ -201,16 +223,28 @@ bool DS::split_contents()
         ncch.SetPlainRegionFileName("");
         ncch.SetExeFsFileName((cwd / "exefs.bin").string());
         ncch.SetRomFsFileName((cwd / "romfs.bin").string());
-        bool bResult = ncch.ExtractFile();
-        return bResult;
+        result = ncch.ExtractFile();
     } else {
         std::cerr << "ERROR: can't find " << contents.string() << "\n";
+        return false;
+    }
+    if (result) {
+        if (set.verbose) {
+            std::cout << "----- splitting contents done\n";
+        }
+        return true;
+    } else {
+        std::cerr << "ERROR: There was an error splitting the contents\n";
         return false;
     }
 }
 
 bool DS::extract_exefs()
 {
+    if (set.verbose) {
+        std::cout << "----- extracting exefs\n";
+    }
+    bool result;
     std::filesystem::path exefs = cwd / "exefs.bin";
     if (std::filesystem::exists(exefs)) {
         CExeFs exeFs;
@@ -219,15 +253,28 @@ bool DS::extract_exefs()
         exeFs.SetHeaderFileName((cwd / "exefs.header").string());
         exeFs.SetExeFsDirName((cwd / "exefs").string());
         exeFs.SetUncompress(false);
-        return exeFs.ExtractFile();
+        result = exeFs.ExtractFile();
     } else {
         std::cerr << "ERROR: can't find " << exefs.string() << "\n";
+        return false;
+    }
+    if (result) {
+        if (set.verbose) {
+            std::cout << "----- extracting exefs done\n";
+        }
+        return true;
+    } else {
+        std::cerr << "ERROR: There was an error extracting exefs\n";
         return false;
     }
 }
 
 bool DS::extract_banner()
 {
+    if (set.verbose) {
+        std::cout << "----- extracting banner\n";
+    }
+    bool result;
     fs::create_directory(cwd / "banner");
     std::string banner_ext = "bin";
     if (fs::exists(cwd / "exefs" / "banner.bnr"))
@@ -237,16 +284,25 @@ bool DS::extract_banner()
     banner.SetFileName((cwd / "exefs" / (std::string("banner.") + banner_ext)).string());
     banner.SetVerbose(set.verbose);
     banner.SetBannerDirName((cwd / "banner").string());
-    return banner.ExtractFile();
+    result = banner.ExtractFile();
 
-    // const std::vector<std::string> call_args = {"-x", "-t", "banner", "-f", (cwd / "exefs" / (std::string("banner.") + banner_ext)).string(), "--banner-dir", (cwd / "banner").string()};
-    // run_3dstool(call_args);
-
-    return 1;
+    if (result) {
+        if (set.verbose) {
+            std::cout << "----- extracting banner done\n";
+        }
+        return true;
+    } else {
+        std::cerr << "ERROR: There was an error extracting the banner from exefs\n";
+        return false;
+    }
 }
 
 bool DS::rebuild_banner()
 {
+    if (set.verbose) {
+        std::cout << "----- rebuilding banner\n";
+    }
+    bool result;
     std::string banner_ext = "bin";
     if (fs::exists(cwd / "exefs" / "banner.bnr"))
         banner_ext = "bnr";
@@ -256,22 +312,50 @@ bool DS::rebuild_banner()
     banner.SetFileName((cwd / "exefs" / (std::string("banner.") + banner_ext)).string());
     banner.SetVerbose(set.verbose);
     banner.SetBannerDirName((cwd / "banner").string());
-    return banner.CreateFile();
+    result = banner.CreateFile();
+
+    if (result) {
+        if (set.verbose) {
+            std::cout << "----- rebuilding banner done\n";
+        }
+        return true;
+    } else {
+        std::cerr << "ERROR: There was an error rebuilding the banner\n";
+        return false;
+    }
 }
 
 bool DS::rebuild_exefs()
 {
+    if (set.verbose) {
+        std::cout << "----- rebuilding exefs\n";
+    }
+    bool result;
     CExeFs exeFs;
     exeFs.SetFileName((cwd / "exefs.bin").string());
     exeFs.SetVerbose(set.verbose);
     exeFs.SetHeaderFileName((cwd / "exefs.header").string());
     exeFs.SetExeFsDirName((cwd / "exefs").string());
     exeFs.SetCompress(false);
-    return exeFs.CreateFile();
+    result = exeFs.CreateFile();
+
+    if (result) {
+        if (set.verbose) {
+            std::cout << "----- rebuilding exefs done\n";
+        }
+        return true;
+    } else {
+        std::cerr << "ERROR: There was an error rebuilding exefs\n";
+        return false;
+    }
 }
 
 bool DS::rebuild_cxi()
 {
+    if (set.verbose) {
+        std::cout << "----- rebuilding cxi\n";
+    }
+    bool result;
     CNcch ncch;
     ncch.SetFileName((cwd / (name + ".cxi")).string());
     ncch.SetVerbose(set.verbose);
@@ -284,7 +368,17 @@ bool DS::rebuild_cxi()
     ncch.SetPlainRegionFileName("");
     ncch.SetExeFsFileName((cwd / "exefs.bin").string());
     ncch.SetRomFsFileName((cwd / "romfs.bin").string());
-    return ncch.CreateFile();
+    result = ncch.CreateFile();
+
+    if (result) {
+        if (set.verbose) {
+            std::cout << "----- rebuilding cxi done\n";
+        }
+        return true;
+    } else {
+        std::cerr << "ERROR: There was an error rebuilding cxi\n";
+        return false;
+    }
 }
 
 MakeRom::MakeRom(const std::string &name, const std::filesystem::path &out_cia, const versionS version, const Settings &set)
@@ -297,6 +391,10 @@ MakeRom::MakeRom(const std::string &name, const std::filesystem::path &out_cia, 
 
 bool MakeRom::rebuild_cia()
 {
+    if (set.verbose) {
+        std::cout << "----- rebuilding CIA\n";
+    }
+    int result;
     std::string cxi = (cwd / "temp" / name / (name + ".cxi")).string();
     user_settings mr_set;
 
@@ -328,8 +426,32 @@ bool MakeRom::rebuild_cia()
     ReadFile64(mr_set.common.workingFile.buffer, mr_set.common.workingFile.size, 0, ncch0);
     fclose(ncch0);
 
-    build_CIA(&mr_set);
+    std::vector<std::string> temp_output;
+    capture_output_and_errors(result = build_CIA(&mr_set), temp_output);
+
+    for (size_t i = 0; i < temp_output.size(); i++) {
+        if (!temp_output[i].starts_with("[NCCH ERROR] Failed to load ncch aes key") &&
+            !temp_output[i].starts_with("[CIA WARNING] CXI AES Key could not be loaded") &&
+            !temp_output[i].starts_with("      Meta Region, SaveDataSize, Remaster Version cannot be obtained")) {
+            output_lines.push_back(temp_output[i]);
+        }
+    }
+    if (set.verbose) {
+        for (const auto &line : output_lines) {
+            std::cout << line << "\n";
+        }
+    }
+
     free(mr_set.common.contentPath);
-    return true;
+
+    if (result == 0) {
+        if (set.verbose) {
+            std::cout << "----- rebuilding CIA done\n";
+        }
+        return true;
+    } else {
+        std::cerr << "ERROR: There was an error rebuilding CIA\n";
+        return false;
+    }
 }
 } // namespace Tool

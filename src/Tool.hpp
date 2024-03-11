@@ -1,11 +1,12 @@
 #pragma once
+#include <filesystem>
 #include <string>
 #include <vector>
 
 #include "Game.hpp"
 #include "Settings.hpp"
+
 #include <ctrtool/CiaProcess.h>
-#include <filesystem>
 
 int main_3dstool(int argc, char* argv[]);
 namespace Tool {
@@ -29,8 +30,7 @@ class CTR : public BasicTool {
   public:
     CTR(const std::filesystem::path &cia, const std::filesystem::path &cwd, const Settings &set);
     versionS get_cia_version();
-    versionS get_cia_version2();
-    int extract_cia_contents();
+    bool extract_cia_contents();
 };
 
 class DS : public BasicTool {
@@ -60,3 +60,7 @@ class MakeRom : public BasicTool {
     bool rebuild_cia();
 };
 } // namespace Tool
+
+class CIABuilder {
+  protected:
+};

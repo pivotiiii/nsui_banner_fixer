@@ -14,7 +14,7 @@ class Game {
   public:
     Game(const std::filesystem::path &cia, const Settings &set);
     ~Game();
-    int fix_banner();
+    bool fix_banner();
 
   private:
     const std::filesystem::path cia_path;
@@ -25,9 +25,9 @@ class Game {
     const Settings set;
 
     versionS get_version();
-    int extract_cia();
-    int edit_bcmdl();
-    int repack_cia();
+    bool extract_cia();
+    bool edit_bcmdl();
+    bool repack_cia();
 };
 
 #endif

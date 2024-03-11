@@ -44,31 +44,31 @@ target_link_libraries(${PROJECT_NAME} PUBLIC TCLAP subprocess stdcapture)
 
 #----------------------------------------------------------------------------------------
 
-FetchContent_Declare(
-    3dstool
-    URL         https://github.com/dnasdw/3dstool/releases/download/v1.0.9/3dstool.zip
-)
-
-FetchContent_Declare(
-    ctrtool
-    URL         https://github.com/3DSGuy/Project_CTR/releases/download/ctrtool-v0.5/ctrtool-win_x86_64-v0.5.zip
-)
-
-FetchContent_Declare(
-    makerom
-    URL         https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.15/makerom-win_x86_64-v0.15.zip
-)
-
-FetchContent_MakeAvailable(3dstool ctrtool makerom)
-
-add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND mkdir -p $<TARGET_FILE_DIR:${PROJECT_NAME}>/tools
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${3dstool_SOURCE_DIR}/3dstool.exe
-            ${ctrtool_SOURCE_DIR}/ctrtool.exe
-            ${makerom_SOURCE_DIR}/makerom.exe
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>/tools)
+#FetchContent_Declare(
+#    3dstool
+#    URL         https://github.com/dnasdw/3dstool/releases/download/v1.0.9/3dstool.zip
+#)
+#
+#FetchContent_Declare(
+#    ctrtool
+#    URL         https://github.com/3DSGuy/Project_CTR/releases/download/ctrtool-v0.5/ctrtool-win_x86_64-v0.5.zip
+#)
+#
+#FetchContent_Declare(
+#    makerom
+#    URL         https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.15/makerom-win_x86_64-v0.15.zip
+#)
+#
+#FetchContent_MakeAvailable(3dstool ctrtool makerom)
+#
+#add_custom_command(
+#    TARGET ${PROJECT_NAME} POST_BUILD
+#    COMMAND mkdir -p $<TARGET_FILE_DIR:${PROJECT_NAME}>/tools
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#            ${3dstool_SOURCE_DIR}/3dstool.exe
+#            ${ctrtool_SOURCE_DIR}/ctrtool.exe
+#            ${makerom_SOURCE_DIR}/makerom.exe
+#            $<TARGET_FILE_DIR:${PROJECT_NAME}>/tools)
 
 #----------------------------------------------------------------------------------------
 # 3DSTool
@@ -84,13 +84,6 @@ FetchContent_Declare(
 )
 FetchContent_Populate(3dstool_download)
 
-#add_custom_command(
-#    OUTPUT ${3dstool_download_SOURCE_DIR}/src/utility.cpp
-#    COMMAND echo test
-#    COMMENT "running custom 3dstool command")
-#add_custom_target(3dstool_check ALL DEPENDS ${3dstool_download_SOURCE_DIR}/src/utility.cpp)
-
-#add_dependencies(${PROJECT_NAME} 3dstool_check)
 target_include_directories(${PROJECT_NAME} PRIVATE ${3dstool_download_SOURCE_DIR}/src)
 file(GLOB 3dstool_sources ${3dstool_download_SOURCE_DIR}/src/*.cpp)
 target_sources(${PROJECT_NAME} PRIVATE ${3dstool_sources})
@@ -290,9 +283,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC makerom_lib)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/dist)
 install(TARGETS ${PROJECT_NAME} DESTINATION .)
-install(FILES ${3dstool_SOURCE_DIR}/3dstool.exe DESTINATION tools)
-install(FILES ${ctrtool_SOURCE_DIR}/ctrtool.exe DESTINATION tools)
-install(FILES ${makerom_SOURCE_DIR}/makerom.exe DESTINATION tools)
+#install(FILES ${3dstool_SOURCE_DIR}/3dstool.exe DESTINATION tools)
+#install(FILES ${ctrtool_SOURCE_DIR}/ctrtool.exe DESTINATION tools)
+#install(FILES ${makerom_SOURCE_DIR}/makerom.exe DESTINATION tools)
 
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_VERSION_MAJOR "${nsui_banner_fixer_VERSION_MAJOR}")

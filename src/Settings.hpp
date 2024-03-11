@@ -1,5 +1,4 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#pragma once
 #include <filesystem>
 
 typedef struct Settings {
@@ -9,5 +8,3 @@ typedef struct Settings {
     bool verbose;
     bool quiet;
 } Settings;
-
-#endif
