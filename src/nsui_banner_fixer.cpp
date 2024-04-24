@@ -7,8 +7,15 @@
 #include <vector>
 
 #include "Game.hpp"
-#include "globals.hpp"
-#include "nsui_banner_fixer.hpp"
+#ifndef VERSION
+#define VERSION "0.0.0"
+#endif
+#ifndef YEAR
+#define YEAR "0000"
+#endif
+#ifndef COMPILE_TIME
+#define COMPILE_TIME "0000-00-00 00:00:00 UTC"
+#endif
 
 namespace fs = std::filesystem;
 namespace sp = subprocess;
@@ -33,10 +40,22 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, bool &replace
     try {
         TCLAP::CmdLine cmd("Either supply a .cia file as an argument or place all the files you want to convert in your current working directory.", ' ', "1.4", false);
         TCLAP::UnlabeledValueArg<std::string> ciaArg("file.cia", "The .cia file to be fixed.", false, "", "path", cmd);
-        TCLAP::SwitchArg replaceArg("r", "replace", "Set this flag to fix the .cia file(s) directly instead of saving a fixed copy in /out", cmd, false);
-        TCLAP::SwitchArg verboseArg("v", "verbose", "Set this flag to see more output as the program is working.", cmd, false);
-        TCLAP::SwitchArg quietArg("q", "quiet", "Set this flag to silence any non error output.", cmd, false);
+        TCLAP::SwitchArg versionArg("", "version", "Display the program version.", cmd, false);
+        TCLAP::SwitchArg licenseArg("", "licenses", "Display license information.", cmd, false);
         cmd.parse(argc, argv);
+        if (versionArg) {
+            std::cout << "nsui_banner_fixer " << VERSION << "\nCopyright (c) " << YEAR << " pivotiii\nbuilt " << COMPILE_TIME << "\n";
+            return 2;
+        }
+
+        if (licenseArg) {
+            std::cout << "nsui_banner_fixer " << VERSION << "\nCopyright (c) " << YEAR << " pivotiii\n\n"
+                                                                                          "nsui_banner_fixer uses the following libraries licensed under the MIT license:\n\n"
+                                                                                          "--- TCLAP ---\nCopyright (c) 2003 Michael E. Smoot\nCopyright (c) 2004 Daniel Aarno\nCopyright (c) 2017 Google Inc.\n\n"
+                                                                                          "--- cpp-subprocess ---\nCopyright (c) 2016-2018 Arun Muralidharan\n\n"
+                                                                                          "The full license text is available at https://github.com/pivotiiii/nsui_banner_fixer/blob/master/LICENSE\n";
+            return 2;
+        }
 
         if (ciaArg.getValue() != "") {
             if (!ciaArg.getValue().ends_with(".cia"))

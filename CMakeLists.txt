@@ -8,8 +8,14 @@ project(
 add_executable(nsui_banner_fixer src/nsui_banner_fixer.cpp src/Game.cpp)
 target_compile_features(nsui_banner_fixer PUBLIC cxx_std_20)
 
+target_compile_definitions(nsui_banner_fixer PRIVATE VERSION=\"${CMAKE_PROJECT_VERSION}\")
+string(TIMESTAMP year %Y UTC)
+target_compile_definitions(nsui_banner_fixer PRIVATE YEAR="${year}")
+string(TIMESTAMP compile_time "%Y-%m-%d %H:%M:%S UTC" UTC)
+target_compile_definitions(nsui_banner_fixer PRIVATE COMPILE_TIME="${compile_time}")
+
 #include(CTest)
-enable_testing()
+#enable_testing()
 
 #----------------------------------------------------------------------------------------
 
@@ -70,7 +76,7 @@ install(FILES ${makerom_SOURCE_DIR}/makerom.exe DESTINATION tools)
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_VERSION_MAJOR "${nsui_banner_fixer_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${nsui_banner_fixer_VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_MICRO "${nsui_banner_fixer_VERSION_MICRO}")
+set(CPACK_PACKAGE_VERSION_MICRO "${nsui_banner_fixer_VERSION_PATCH}")
 set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_BINARY_NSIS OFF)
 set(CPACK_BINARY_ZIP ON)
