@@ -8,8 +8,8 @@ project(
 include(dependencies.cmake)
 add_subdirectory(src)
 
-#include(CTest)
-#enable_testing()
+enable_testing()
+add_subdirectory(test)
 
 #----------------------------------------------------------------------------------------
 

@@ -16,7 +16,7 @@ class Game {
     ~Game();
     bool fix_banner();
 
-  private:
+  protected:
     Settings set;
     std::filesystem::path cia_path;
     std::filesystem::path cwd;
