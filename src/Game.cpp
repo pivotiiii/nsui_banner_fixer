@@ -2,8 +2,9 @@
 #include <fstream>
 #include <iostream>
 #include <regex>
-#include <subprocess.hpp>
 #include <vector>
+
+#include <subprocess.hpp>
 
 #include "Game.hpp"
 

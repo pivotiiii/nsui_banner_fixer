@@ -1,11 +1,9 @@
 #include <Windows.h>
 #include <filesystem>
-#include <fstream>
 #include <iostream>
-#include <regex>
-#include <subprocess.hpp>
-#include <tclap/Cmdline.h>
 #include <vector>
+
+#include <tclap/Cmdline.h>
 
 #include "Game.hpp"
 #include "Settings.hpp"
@@ -21,7 +19,6 @@
 #endif
 
 namespace fs = std::filesystem;
-namespace sp = subprocess;
 
 bool check_requirements(std::vector<fs::path> reqs)
 {
