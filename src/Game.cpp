@@ -7,6 +7,26 @@
 
 #include "Game.hpp"
 
+#define run_process(name, verbose_offset, ret_code, err_msg)                         \
+    {                                                                                \
+        if (set.verbose) {                                                           \
+            name.insert(name.begin() + verbose_offset, "-v");                        \
+        }                                                                            \
+                                                                                     \
+        sp::Popen process = sp::Popen(name, sp::output {sp::PIPE});                  \
+        auto obuf = process.communicate().first;                                     \
+                                                                                     \
+        if (process.retcode() != ret_code) {                                         \
+            std::cerr << obuf.buf.data() << "\n";                                    \
+            std::cerr << "ERROR: " << err_msg << " (" << process.retcode() << ")\n"; \
+            return false;                                                            \
+        }                                                                            \
+                                                                                     \
+        if (set.verbose) {                                                           \
+            std::cerr << obuf.buf.data() << "\n";                                    \
+        }                                                                            \
+    }
+
 namespace fs = std::filesystem;
 namespace sp = subprocess;
 
@@ -79,7 +99,7 @@ versionS Game::get_version()
 {
     versionS version;
 
-    auto output_buffer = sp::check_output({"D:/Documents/VS Code/nsui_banner_fixer/cpp/src/tools/ctrtool.exe", "-i", this->cia_path.string()});
+    auto output_buffer = sp::check_output({set.ctrtool.string(), "-i", this->cia_path.string()});
     if (output_buffer.buf.data() != NULL) {
         std::stringstream ss(output_buffer.buf.data());
         std::string line;
@@ -110,10 +130,7 @@ bool Game::extract_cia()
     std::vector<std::string> extract_contents = {set.ctrtool.string(),
                                                  std::string("--contents=") + (this->cwd / "contents").string(),
                                                  this->cia_path.string()};
-    if (sp::call(extract_contents)) {
-        std::cerr << "ERROR: Failed to extract contents from .CIA\n";
-        return false;
-    }
+    run_process(extract_contents, 1, 0, "Failed to extract contents from .CIA");
 
     std::vector<std::string> split_contents = {set.dstool.string(),
                                                "-x", "-t",
@@ -122,20 +139,14 @@ bool Game::extract_cia()
                                                "--exh", (this->cwd / "exheader.bin").string(),
                                                "--exefs", (this->cwd / "exefs.bin").string(),
                                                "--romfs", (this->cwd / "romfs.bin").string()};
-    if (sp::call(split_contents)) {
-        std::cerr << "ERROR: Failed to split contents\n";
-        return false;
-    }
+    run_process(split_contents, 2, 0, "Failed to split contents");
 
     std::vector<std::string> extract_exefs = {set.dstool.string(),
                                               "-x", "-t",
                                               "exefs", "-f", (this->cwd / "exefs.bin").string(),
                                               "--header", (this->cwd / "exefs.header").string(),
                                               "--exefs-dir", (this->cwd / "exefs").string()};
-    if (sp::call(extract_exefs)) {
-        std::cerr << "ERROR: Failed to extract exefs from contents\n";
-        return false;
-    }
+    run_process(extract_exefs, 2, 0, "Failed to extract exefs from contents");
 
     fs::create_directory(this->cwd / "banner");
     if (fs::exists(this->cwd / "exefs" / "banner.bnr")) {
@@ -146,10 +157,7 @@ bool Game::extract_cia()
                                                "-x", "-t",
                                                "banner", "-f", (this->cwd / "exefs" / (std::string("banner.") + this->banner_ext)).string(),
                                                "--banner-dir", (this->cwd / "banner").string()};
-    if (sp::call(extract_banner)) {
-        std::cerr << "ERROR: Failed to extract banner from exefs\n";
-        return false;
-    }
+    run_process(extract_banner, 2, 0, "Failed to extract banner from exefs");
 
     return true;
 }
@@ -186,6 +194,7 @@ bool Game::edit_bcmdl()
             }
         } else {
             std::cerr << "ERROR: Failed to open banner" << i << ".bcmdl\n";
+            std::cerr << "Was " << this->name << ".cia created with NSUI v28 using the 3D GBA banner?\n";
             return false;
         }
         file.close();
@@ -200,20 +209,14 @@ bool Game::repack_cia()
                                                "-c", "-t",
                                                "banner", "-f", (this->cwd / "exefs" / (std::string("banner.") + this->banner_ext)).string(),
                                                "--banner-dir", (this->cwd / "banner").string()};
-    if (sp::call(rebuild_banner)) {
-        std::cerr << "ERROR: Failed to rebuild banner\n";
-        return false;
-    }
+    run_process(rebuild_banner, 2, 0, "Failed to rebuild banner");
 
     std::vector<std::string> rebuild_exefs = {set.dstool.string(),
                                               "-c", "-t",
                                               "exefs", "-f", (this->cwd / "exefs.bin").string(),
                                               "--header", (this->cwd / "exefs.header").string(),
                                               "--exefs-dir", (this->cwd / "exefs").string()};
-    if (sp::call(rebuild_exefs)) {
-        std::cerr << "ERROR: Failed to rebuild exefs\n";
-        return false;
-    }
+    run_process(rebuild_exefs, 2, 0, "Failed to rebuild exefs");
 
     std::vector<std::string> rebuild_cxi = {set.dstool.string(),
                                             "-c", "-t",
@@ -222,10 +225,7 @@ bool Game::repack_cia()
                                             "--exh", (this->cwd / "exheader.bin").string(),
                                             "--exefs", (this->cwd / "exefs.bin").string(),
                                             "--romfs", (this->cwd / "romfs.bin").string()};
-    if (sp::call(rebuild_cxi)) {
-        std::cerr << "ERROR: Failed to rebuild cxi\n";
-        return false;
-    }
+    run_process(rebuild_cxi, 2, 0, "Failed to rebuild cxi");
 
     fs::path out_cia;
     if (set.replace) {
@@ -244,10 +244,7 @@ bool Game::repack_cia()
                                             "-major", std::to_string(this->version.major),
                                             "-minor", std::to_string(this->version.minor),
                                             "-micro", std::to_string(this->version.micro)};
-    if (sp::call(rebuild_cia)) {
-        std::cerr << "ERROR: Failed to rebuild CIA\n";
-        return false;
-    }
+    run_process(rebuild_cia, 1, 0, "Failed to rebuild CIA");
 
     return true;
 }
