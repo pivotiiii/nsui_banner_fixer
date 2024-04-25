@@ -1,6 +1,8 @@
 #include <Windows.h>
+#include <chrono>
 #include <filesystem>
 #include <iostream>
+#include <thread>
 #include <vector>
 
 #include <tclap/Cmdline.h>
@@ -35,13 +37,16 @@ bool check_requirements(std::vector<fs::path> reqs)
     return true;
 }
 
-void pause_if_double_clicked()
+void pause_if_double_clicked(bool require_key_press = true, int sleep = 0)
 {
     DWORD procIDs[2];
     DWORD maxCount = 2;
     DWORD result = GetConsoleProcessList((LPDWORD) procIDs, maxCount);
     if (result == 1) {
-        system("pause");
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
+        if (require_key_press) {
+            system("pause");
+        }
     }
 }
 
@@ -53,9 +58,9 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &set
         TCLAP::SwitchArg replaceArg("r", "replace", "Fix the .cia file(s) directly instead of saving a fixed copy in /out", cmd, false);
         TCLAP::SwitchArg verboseArg("v", "verbose", "Display more output as the program is working.", cmd, false);
         TCLAP::SwitchArg quietArg("q", "quiet", "Silence any non error output.", cmd, false);
+        TCLAP::SwitchArg helpArg("h", "help", "Display this help message.", cmd, false);
         TCLAP::SwitchArg versionArg("", "version", "Display the program version.", cmd, false);
         TCLAP::SwitchArg licenseArg("", "licenses", "Display license information.", cmd, false);
-        TCLAP::SwitchArg helpArg("h", "help", "Display this help message.", cmd, false);
 
         cmd.parse(argc, argv);
 
@@ -95,6 +100,7 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &set
             }
         }
         if (cias.size() == 0 || helpArg) {
+            pause_if_double_clicked(false, 100); // TCLAP output gets corrupted otherwise :(
             TCLAP::StdOutput().usage(cmd);
             pause_if_double_clicked();
             return 2;
