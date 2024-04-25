@@ -1,7 +1,18 @@
 --- nsui_banner_fixer ---
 Copyright (c) 2024 pivotiii
 
-This project uses libraries licensed under the MIT license.
+nsui_banner_fixer uses the following tools and libraries:
+
+--- CTRTOOL ---
+Copyright (c) 2016 neimod, 3DSGuy
+
+--- CTR MAKEROM v0.15 ---
+Copyright (c) 2014 3DSGuy
+
+nsui_banner_fixer uses the following tools and libraries licensed under the MIT license.
+
+--- 3dstool ---
+Copyright (c) 2014-2020 Daowen Sun
 
 --- TCLAP ---
 Copyright (c) 2003 Michael E. Smoot
