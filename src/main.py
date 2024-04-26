@@ -10,6 +10,8 @@
 #create .cia from .cxi
 #makerom -f cia -o whatever.cia -content CIA.cxi:0:0x00
 
+#TODO: check and account for for special characters in file names (locale dependent?)
+
 import os
 import subprocess
 import shutil
