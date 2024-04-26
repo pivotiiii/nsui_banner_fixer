@@ -47,7 +47,7 @@ bool test_get_version(const fs::path &cia, const Settings &set)
     fs::remove_all(fs::current_path() / "temp");
     fs::remove_all(fs::current_path() / "out");
 
-    if (version.major == 0 && version.minor == 6 && version.micro == 9) {
+    if (version.major == 0 && version.minor == 1 && version.micro == 2) {
         return true;
     }
     return false;

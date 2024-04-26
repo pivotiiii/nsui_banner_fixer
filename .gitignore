@@ -37,3 +37,4 @@ venv
 out/*
 in/*
 include
+!test*.cia

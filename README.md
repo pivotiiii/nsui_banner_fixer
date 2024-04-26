@@ -4,9 +4,9 @@ This fixes GBA VC banners created with [New Super Ultimate Injector v28](https:/
 
 ![HNI_0032](https://user-images.githubusercontent.com/17112987/231853029-00142486-cb25-452a-9734-05e5c277f149.jpg) ![HNI_0033](https://user-images.githubusercontent.com/17112987/231853046-1bb2a3f2-cd1b-4a2d-a6b6-1639a607d560.jpg)
 
-🔴 🔴 🔴
-WARNING: Overwriting an injected GBA game will overwrite its save file.
-Consider backing up your saves before, e.g. with [GBAVCSM](https://github.com/TurdPooCharger/GBAVCSM).
+> [!Warning]
+> Overwriting an injected GBA game will overwrite its save file.
+> Consider backing up your saves before, e.g. with [GBAVCSM](https://github.com/TurdPooCharger/GBAVCSM).
 
 # Download
 
