@@ -18,15 +18,19 @@ FetchContent_Declare(
     PATCH_COMMAND       git apply "${CMAKE_SOURCE_DIR}/patches/tclap.patch"
     UPDATE_DISCONNECTED 1
 )
-FetchContent_Declare(
-    subprocess
-    GIT_REPOSITORY      https://github.com/arun11299/cpp-subprocess.git
-    GIT_TAG             40cd59c0970960a0ef41365ae9d96c6a72ee6922 #
-    PATCH_COMMAND       git apply "${CMAKE_SOURCE_DIR}/patches/subprocess.patch"
-    UPDATE_DISCONNECTED 1
-)
+FetchContent_MakeAvailable(tclap)
 
-FetchContent_MakeAvailable(tclap subprocess)
+#----------------------------------------------------------------------------------------
+
+FetchContent_Declare(
+  Boost
+  URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz
+  URL_MD5 893b5203b862eb9bbd08553e24ff146a
+  DOWNLOAD_EXTRACT_TIMESTAMP ON
+  EXCLUDE_FROM_ALL
+)
+set(BOOST_INCLUDE_LIBRARIES process)
+FetchContent_MakeAvailable(Boost)
 
 #----------------------------------------------------------------------------------------
 

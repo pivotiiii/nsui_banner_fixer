@@ -8,7 +8,7 @@ set(test_files test_v28.cia test_v27.cia)
 foreach(test_name IN LISTS test_names)
     add_executable(${test_name} ${test_name}.cpp)
     target_compile_features(${test_name} PRIVATE cxx_std_20)
-    target_link_libraries(${test_name} PRIVATE nsui_banner_fixer_game subprocess)
+    target_link_libraries(${test_name} PRIVATE nsui_banner_fixer_game Boost::process)
     add_test(NAME ${test_name} COMMAND $<TARGET_FILE:${test_name}> WORKING_DIRECTORY $<TARGET_FILE_DIR:${test_name}>)
 endforeach()
 

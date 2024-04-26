@@ -13,7 +13,7 @@ add_library(nsui_banner_fixer_game
             Settings.hpp)
 target_compile_features(nsui_banner_fixer_game PRIVATE cxx_std_20)
 target_include_directories(nsui_banner_fixer_game INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(nsui_banner_fixer_game PRIVATE subprocess)
+target_link_libraries(nsui_banner_fixer_game PRIVATE Boost::process)
 
 target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game TCLAP)
 

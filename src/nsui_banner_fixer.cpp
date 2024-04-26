@@ -77,7 +77,6 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &set
                                                                                           "nsui_banner_fixer uses the following tools and libraries licensed under the MIT license:\n\n"
                                                                                           "3dstool\nCopyright (c) 2014-2020 Daowen Sun\n\n"
                                                                                           "TCLAP\nCopyright (c) 2003 Michael E. Smoot\nCopyright (c) 2004 Daniel Aarno\nCopyright (c) 2017 Google Inc.\n\n"
-                                                                                          "cpp-subprocess\nCopyright (c) 2016-2018 Arun Muralidharan\n\n"
                                                                                           "The full MIT license text is available at https://github.com/pivotiiii/nsui_banner_fixer/blob/master/LICENSE\n";
             return 2;
         }

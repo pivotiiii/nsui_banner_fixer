@@ -1,33 +1,37 @@
 #include <filesystem>
 #include <regex>
 
-#include <subprocess.hpp>
+#include <Boost/process.hpp>
 
 #include <Game.hpp>
 #include <Settings.hpp>
 
 namespace fs = std::filesystem;
+namespace bp = boost::process;
 
 versionS get_version(const fs::path &cia, const Settings set)
 {
     versionS version;
-    auto output_buffer = subprocess::check_output({set.ctrtool.string(), "-i", cia.string()});
-    if (output_buffer.buf.data() != NULL) {
-        std::stringstream ss(output_buffer.buf.data());
-        std::string line;
-        while (std::getline(ss, line, '\n')) {
-            if (line.starts_with("Title version:")) {
-                std::regex version_regex("(\\d+).(\\d+).(\\d+)");
-                std::smatch matches;
-                if (std::regex_search(line, matches, version_regex)) {
-                    if (matches.size() == 4) {
-                        version.major = max(min(63, stoi(matches[1].str())), 0);
-                        version.minor = max(min(63, stoi(matches[2].str())), 0);
-                        version.micro = max(min(15, stoi(matches[3].str())), 0);
-                    }
+    bp::ipstream output_stream;
+    std::string line;
+
+    bp::system(bp::exe = set.ctrtool.string(),
+               bp::args = {"-i",
+                           cia.string()},
+               bp::std_out > output_stream);
+
+    while (std::getline(output_stream, line)) {
+        if (line.starts_with("Title version:")) {
+            std::regex version_regex("(\\d+).(\\d+).(\\d+)");
+            std::smatch matches;
+            if (std::regex_search(line, matches, version_regex)) {
+                if (matches.size() == 4) {
+                    version.major = std::max(std::min(63, stoi(matches[1].str())), 0);
+                    version.minor = std::max(std::min(63, stoi(matches[2].str())), 0);
+                    version.micro = std::max(std::min(15, stoi(matches[3].str())), 0);
                 }
-                break;
             }
+            break;
         }
     }
     return version;
