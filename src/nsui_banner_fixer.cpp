@@ -1,66 +1,98 @@
+#include <chrono>
 #include <filesystem>
-#include <fstream>
 #include <iostream>
-#include <regex>
-#include <subprocess.hpp>
-#include <tclap/CmdLine.h>
+#include <thread>
 #include <vector>
+
+#include <tclap/CmdLine.h>
 
 #include "Game.hpp"
 #include "Settings.hpp"
-#include "globals.hpp"
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-#include "stdafx.h"
+#ifdef _WIN32
 #include <Windows.h>
 #endif
 
-namespace fs = std::filesystem;
-namespace sp = subprocess;
+#ifndef VERSION
+#define VERSION "0.0.0"
+#endif
+#ifndef YEAR
+#define YEAR "0000"
+#endif
+#ifndef COMPILE_TIME
+#define COMPILE_TIME "0000-00-00 00:00:00 UTC"
+#endif
 
-void pause_if_double_clicked()
+namespace fs = std::filesystem;
+
+void pause_if_double_clicked(bool require_key_press = true, int sleep = 0)
 {
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#ifdef _WIN32
     DWORD procIDs[2];
     DWORD maxCount = 2;
     DWORD result = GetConsoleProcessList((LPDWORD) procIDs, maxCount);
     if (result == 1) {
-        system("pause");
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
+        if (require_key_press) {
+            system("pause");
+        }
     }
 #endif
 }
 
-bool parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &set)
+int parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &set)
 {
     try {
-        TCLAP::CmdLine cmd("Either supply a .cia file as an argument or place all the files you want to convert in your current working directory.", ' ', "1.4", false);
+        TCLAP::CmdLine cmd("Either supply a .cia file as an argument or place all the files you want to convert in your current working directory and run this program again.", ' ', "1.4", false);
         TCLAP::UnlabeledValueArg<std::string> ciaArg("file.cia", "The .cia file to be fixed.", false, "", "path", cmd);
-        TCLAP::SwitchArg replaceArg("r", "replace", "Set this flag to fix the .cia file(s) directly instead of saving a fixed copy in /out", cmd, false);
-        TCLAP::SwitchArg verboseArg("v", "verbose", "Set this flag to see more output as the program is working.", false);
-        TCLAP::SwitchArg quietArg("q", "quiet", "Set this flag to silence any non error output.", false);
-
-        TCLAP::EitherOf verbosity;
-        verbosity.add(verboseArg);
-        verbosity.add(quietArg);
-        cmd.add(verbosity);
+        TCLAP::SwitchArg replaceArg("r", "replace", "Fix the .cia file(s) directly instead of saving a fixed copy in /out", cmd, false);
+        TCLAP::SwitchArg verboseArg("v", "verbose", "Display more output as the program is working.", cmd, false);
+        TCLAP::SwitchArg quietArg("q", "quiet", "Silence any non error output.", cmd, false);
+        TCLAP::SwitchArg helpArg("h", "help", "Display this help message.", cmd, false);
+        TCLAP::SwitchArg versionArg("", "version", "Display the program version.", cmd, false);
+        TCLAP::SwitchArg licenseArg("", "licenses", "Display license information.", cmd, false);
 
         cmd.parse(argc, argv);
 
+        if (versionArg) {
+            std::cout << "nsui_banner_fixer " << VERSION << "\nCopyright (c) " << YEAR << " pivotiii\nbuilt " << COMPILE_TIME << "\n";
+            return 2;
+        }
+
+        if (licenseArg) {
+            std::cout << "nsui_banner_fixer " << VERSION << "\nCopyright (c) " << YEAR << " pivotiii\n\n"
+                                                                                          "nsui_banner_fixer uses the following tools and libraries:\n\n"
+                                                                                          "CTRTOOL\nCopyright (c) 2016 neimod, 3DSGuy\n\n"
+                                                                                          "CTR MAKEROM v0.15\nCopyright (c) 2014 3DSGuy\n\n"
+                                                                                          "nsui_banner_fixer uses the following tools and libraries licensed under the MIT license:\n\n"
+                                                                                          "3dstool\nCopyright (c) 2014-2020 Daowen Sun\n\n"
+                                                                                          "TCLAP\nCopyright (c) 2003 Michael E. Smoot\nCopyright (c) 2004 Daniel Aarno\nCopyright (c) 2017 Google Inc.\n\n"
+                                                                                          "The full MIT license text is available at https://github.com/pivotiiii/nsui_banner_fixer/blob/master/LICENSE\n";
+            return 2;
+        }
+
         if (ciaArg.getValue() != "") {
-            if (!ciaArg.getValue().ends_with(".cia"))
-                return false;
-            if (!fs::exists(fs::absolute(fs::path(ciaArg.getValue()))))
-                return false;
+            if (!ciaArg.getValue().ends_with(".cia")) {
+                std::cerr << "ERROR: the supplied file is not a .cia file!\n";
+                return 1;
+            }
+            if (!fs::exists(fs::absolute(fs::path(ciaArg.getValue())))) {
+                std::cerr << "ERROR: cannot find the specified .cia file!\n";
+                return 1;
+            }
             cias.push_back(fs::absolute(fs::path(ciaArg.getValue())));
         } else {
             for (const auto &dir_entry : fs::directory_iterator(fs::current_path())) {
-                if (dir_entry.path().extension().string() == ".cia")
+                if (dir_entry.path().extension().string() == ".cia") {
                     cias.push_back(fs::absolute(dir_entry.path()));
+                }
             }
         }
-        if (cias.size() == 0) {
+        if (cias.size() == 0 || helpArg) {
+            pause_if_double_clicked(false, 100); // TCLAP output gets corrupted otherwise :(
             TCLAP::StdOutput().usage(cmd);
-            return false;
+            pause_if_double_clicked();
+            return 2;
         }
 
         set.replace = replaceArg.getValue();
@@ -75,20 +107,34 @@ bool parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &se
         std::cerr << e.what() << '\n';
     }
 
-    return true;
+    return 0;
 }
-// int main_3dstool(int argc, char* argv[]);
+
 int main(int argc, char* argv[])
 {
     Settings set;
     set.bin = argv[0];
     set.cwd = fs::current_path();
 
+#ifdef _Win32
+    set.dstool = set.bin.parent_path() / "tools" / "3dstool.exe";
+    set.ctrtool = set.bin.parent_path() / "tools" / "ctrtool.exe";
+    set.makerom = set.bin.parent_path() / "tools" / "makerom.exe";
+    if (!check_requirements(std::vector<fs::path> {set.dstool, set.ctrtool, set.makerom})) {
+        std::cerr << "ERROR: requirements are missing!\n";
+        return 1;
+    }
+#endif
+
     std::vector<fs::path> cia_paths;
 
-    if (!parse_args(argc, argv, cia_paths, set)) {
-        std::cerr << "ERROR: there was something wrong with the supplied arguments!\n";
-        return 1;
+    int parse_args_return = parse_args(argc, argv, cia_paths, set);
+    switch (parse_args_return) {
+        case 1:
+            std::cerr << "ERROR: there was something wrong with the supplied arguments!\n";
+            return 1;
+        case 2:
+            return 0;
     }
 
     struct result {
@@ -110,5 +156,6 @@ int main(int argc, char* argv[])
     }
 
     pause_if_double_clicked();
+
     return 0;
 }

@@ -31,10 +31,10 @@ disto
 *Kopie*
 build
 buildWSL
-buildWIN
 bannertool*
 makerom*
 venv
 out/*
 in/*
 include
+!test*.cia

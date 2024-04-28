@@ -17,12 +17,12 @@ class Game {
     bool fix_banner();
 
   private:
-    const std::filesystem::path cia_path;
-    const std::filesystem::path cwd;
-    const std::string name;
+    Settings set;
+    std::filesystem::path cia_path;
+    std::filesystem::path cwd;
+    std::string name;
     std::string banner_ext;
     versionS version;
-    const Settings set;
 
     versionS get_version();
     bool extract_cia();
