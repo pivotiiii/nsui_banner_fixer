@@ -1,3 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5acf5f8..bd8c649 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,14 +1,14 @@
+-cmake_minimum_required(VERSION 3.1)
++cmake_minimum_required(VERSION 3.5)
+ project(subprocess VERSION 0.0.1 LANGUAGES CXX)
+ 
+-set(CMAKE_CXX_STANDARD 11 CACHE STRING "C++ standard to use")
+ option(EXPORT_COMPILE_COMMANDS "create clang compile database" ON)
+ option(SUBPROCESS_TESTS "enable subprocess tests" OFF)
+ option(SUBPROCESS_INSTALL "enable subprocess install" OFF)
+ 
+ find_package(Threads REQUIRED)
+ 
+-add_library(subprocess INTERFACE)
++add_library(subprocess INTERFACE subprocess.hpp)
++target_compile_features(subprocess INTERFACE cxx_std_11)
+ target_link_libraries(subprocess INTERFACE Threads::Threads)
+ target_include_directories(subprocess INTERFACE . )
+ 
 diff --git a/subprocess.hpp b/subprocess.hpp
 index 62cfa92..7e34440 100755
 --- a/subprocess.hpp

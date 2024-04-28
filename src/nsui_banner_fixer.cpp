@@ -1,14 +1,17 @@
-#include <Windows.h>
-#include <chrono>
 #include <filesystem>
 #include <iostream>
-#include <thread>
 #include <vector>
 
 #include <tclap/CmdLine.h>
 
 #include "Game.hpp"
 #include "Settings.hpp"
+
+#ifdef _WIN32
+#include <Windows.h>
+#include <chrono>
+#include <thread>
+#endif
 
 #ifndef VERSION
 #define VERSION "0.0.0"
@@ -21,6 +24,21 @@
 #endif
 
 namespace fs = std::filesystem;
+
+void pause_if_double_clicked(bool require_key_press = true, int sleep = 0)
+{
+#ifdef _WIN32
+    DWORD procIDs[2];
+    DWORD maxCount = 2;
+    DWORD result = GetConsoleProcessList((LPDWORD) procIDs, maxCount);
+    if (result == 1) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
+        if (require_key_press) {
+            system("pause");
+        }
+    }
+#endif
+}
 
 bool check_requirements(std::vector<fs::path> reqs)
 {
@@ -35,19 +53,6 @@ bool check_requirements(std::vector<fs::path> reqs)
         return false;
     }
     return true;
-}
-
-void pause_if_double_clicked(bool require_key_press = true, int sleep = 0)
-{
-    DWORD procIDs[2];
-    DWORD maxCount = 2;
-    DWORD result = GetConsoleProcessList((LPDWORD) procIDs, maxCount);
-    if (result == 1) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
-        if (require_key_press) {
-            system("pause");
-        }
-    }
 }
 
 int parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &set)
@@ -126,6 +131,7 @@ int main(int argc, char* argv[])
     set.bin = argv[0];
     set.cwd = fs::current_path();
 
+#ifdef _WIN32
     set.dstool = set.bin.parent_path() / "tools" / "3dstool.exe";
     set.ctrtool = set.bin.parent_path() / "tools" / "ctrtool.exe";
     set.makerom = set.bin.parent_path() / "tools" / "makerom.exe";
@@ -133,6 +139,7 @@ int main(int argc, char* argv[])
         std::cerr << "ERROR: requirements are missing!\n";
         return 1;
     }
+#endif
 
     std::vector<fs::path> cia_paths;
 
@@ -160,7 +167,6 @@ int main(int argc, char* argv[])
     for (const auto &res : results) {
         if (res.result == false) {
             std::cerr << "ERROR: There was a problem processing " << res.cia << "\n";
-            return 1;
         }
     }
 

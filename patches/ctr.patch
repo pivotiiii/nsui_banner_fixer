@@ -1,0 +1,15 @@
+diff --git a/makerom/src/user_settings.h b/makerom/src/user_settings.h
+index e09ec50..a44a714 100644
+--- a/makerom/src/user_settings.h
++++ b/makerom/src/user_settings.h
+@@ -305,4 +305,7 @@ typedef struct
+ 
+ void init_UserSettings(user_settings *set);
+ void free_UserSettings(user_settings *set);
+-int ParseArgs(int argc, char *argv[], user_settings *usr_settings);
+\ No newline at end of file
++int ParseArgs(int argc, char *argv[], user_settings *usr_settings);
++void SetDefaults(user_settings* set);
++int CheckArgumentCombination(user_settings* set);
++int SetKeys(keys_struct* keys);
+\ No newline at end of file
