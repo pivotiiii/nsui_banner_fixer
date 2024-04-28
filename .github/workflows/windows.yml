@@ -31,7 +31,7 @@ jobs:
       uses: actions/cache@v4.0.2
       with:
         # A list of files, directories, and wildcard patterns to cache and restore
-        path: ${{github.workspace}}/build_${{matrix.arch}}/_deps/*-src
+        path: ${{github.workspace}}/build/_deps/*-src
         # An explicit key for restoring and saving the cache
         key: ${{ runner.os }}-build-${{matrix.arch}}-${{hashFiles('dependencies.cmake', 'patches/*.patch')}}
           
@@ -43,20 +43,20 @@ jobs:
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build_${{matrix.arch}} -S ${{github.workspace}} -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE #-DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -B ${{github.workspace}}/build -S ${{github.workspace}} -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE #-DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build_${{matrix.arch}} --config ${{env.BUILD_TYPE}} --target ALL_BUILD
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target ALL_BUILD
 
     - name: Test
-      working-directory: ${{github.workspace}}/build_${{matrix.arch}}
+      working-directory: ${{github.workspace}}/build
       # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}}
 
     - name: Pack
-      working-directory: ${{github.workspace}}/build_${{matrix.arch}}
+      working-directory: ${{github.workspace}}/build
       run: cpack -G ZIP -C ${{env.BUILD_TYPE}}
 
     - name: Upload a Build Artifact
@@ -64,9 +64,9 @@ jobs:
       with:
         name: nsui_banner_fixer_CPACK_${{env.BUILD_TYPE}}_${{matrix.arch}}
         path: |
-          ${{github.workspace}}/build_${{matrix.arch}}/_CPack_Packages/win32/ZIP/*
-          ${{github.workspace}}/build_${{matrix.arch}}/_CPack_Packages/win64/ZIP/*
-          !${{github.workspace}}/build_${{matrix.arch}}/_CPack_Packages/win32/ZIP/*.zip
-          !${{github.workspace}}/build_${{matrix.arch}}/_CPack_Packages/win64/ZIP/*.zip
+          ${{github.workspace}}/build/_CPack_Packages/win32/ZIP/*
+          ${{github.workspace}}/build/_CPack_Packages/win64/ZIP/*
+          !${{github.workspace}}/build/_CPack_Packages/win32/ZIP/*.zip
+          !${{github.workspace}}/build/_CPack_Packages/win64/ZIP/*.zip
         if-no-files-found: ignore
           
