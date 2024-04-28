@@ -13,8 +13,8 @@ list(APPEND CMAKE_MODULE_PATH "${cmakehelpers_SOURCE_DIR}")
 
 FetchContent_Declare(
     tclap
-    GIT_REPOSITORY      https://github.com/mirror/tclap.git
-    GIT_TAG             799a8b1f99818e39fee19d0601030770af1221e1 #v1.4.0-rc1
+    GIT_REPOSITORY      https://git.code.sf.net/p/tclap/code
+    GIT_TAG             4dd8ae4d5c7354db2f38acd76a226e593522c68f #
     PATCH_COMMAND       git apply "${CMAKE_SOURCE_DIR}/patches/tclap.patch"
     UPDATE_DISCONNECTED 1
 )
