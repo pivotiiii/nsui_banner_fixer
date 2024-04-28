@@ -5,7 +5,7 @@
 #include <thread>
 #include <vector>
 
-#include <tclap/Cmdline.h>
+#include <tclap/CmdLine.h>
 
 #include "Game.hpp"
 #include "Settings.hpp"
@@ -145,9 +145,26 @@ int main(int argc, char* argv[])
             return 0;
     }
 
+    struct resultS {
+        fs::path cia;
+        bool result;
+    };
+    std::vector<struct resultS> results;
+
     for (const auto &path : cia_paths) {
-        Game(path, set).fix_banner();
+        struct resultS res = {path, false};
+        res.result = Game(path, set).fix_banner();
+        results.push_back(res);
     }
+
+    for (const auto &res : results) {
+        if (res.result == false) {
+            std::cerr << "ERROR: There was a problem processing " << res.cia << "\n";
+            return 1;
+        }
+    }
+
+    pause_if_double_clicked();
 
     return 0;
 }
