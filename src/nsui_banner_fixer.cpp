@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
     set.bin = argv[0];
     set.cwd = fs::current_path();
 
-#ifdef _Win32
+#ifdef _WIN32
     set.dstool = set.bin.parent_path() / "tools" / "3dstool.exe";
     set.ctrtool = set.bin.parent_path() / "tools" / "ctrtool.exe";
     set.makerom = set.bin.parent_path() / "tools" / "makerom.exe";
@@ -137,14 +137,14 @@ int main(int argc, char* argv[])
             return 0;
     }
 
-    struct result {
+    struct resultS {
         fs::path cia;
         bool result;
     };
-    std::vector<struct result> results;
+    std::vector<struct resultS> results;
 
     for (const auto &path : cia_paths) {
-        struct result res = {path, false};
+        struct resultS res = {path, false};
         res.result = Game(path, set).fix_banner();
         results.push_back(res);
     }
