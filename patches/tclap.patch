@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c2c9a26..fd8f952 100644
+index c2c9a26..e40e55a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -4,10 +4,12 @@ project(TCLAP VERSION 1.4.0 LANGUAGES CXX)
@@ -18,9 +18,13 @@ index c2c9a26..fd8f952 100644
  
  include(CheckCXXSourceCompiles)
  check_cxx_source_compiles("#include <strstream>
-@@ -20,12 +22,20 @@ configure_file(config.h.in tclap/TCLAPConfig.h)
+@@ -18,14 +20,23 @@ int main() { std::istringstream iss; }" TCLAP_HAVE_SSTREAM)
  
- add_library(TCLAP INTERFACE)
+ configure_file(config.h.in tclap/TCLAPConfig.h)
+ 
+-add_library(TCLAP INTERFACE)
++file(GLOB tclap_headers include/tclap/*.h)
++add_library(TCLAP INTERFACE ${tclap_headers})
  target_include_directories(TCLAP INTERFACE include/)
 -install(TARGETS TCLAP DESTINATION include)
 -install(FILES "${PROJECT_BINARY_DIR}/tclap/TCLAPConfig.h"

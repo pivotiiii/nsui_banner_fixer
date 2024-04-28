@@ -1,16 +1,21 @@
 #include <filesystem>
-#include <regex>
-
-#include <Boost/process.hpp>
 
 #include <Game.hpp>
 #include <Settings.hpp>
 
-namespace fs = std::filesystem;
+#if defined(_WIN32)
+#include <Boost/process.hpp>
+#include <regex>
 namespace bp = boost::process;
+#elif defined(__linux)
+#include <Tool.hpp>
+#endif
+
+namespace fs = std::filesystem;
 
 versionS get_version(const fs::path &cia, const Settings set)
 {
+#if defined(_WIN32)
     versionS version;
     bp::ipstream output_stream;
     std::string line;
@@ -35,6 +40,11 @@ versionS get_version(const fs::path &cia, const Settings set)
         }
     }
     return version;
+#elif defined(__linux__)
+    Tool::CTR ctr(cia, set.cwd, set);
+    versionS version = ctr.get_cia_version();
+    return version;
+#endif
 }
 
 bool test_get_version(const fs::path &cia, const Settings &set)
