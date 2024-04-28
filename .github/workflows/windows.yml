@@ -59,14 +59,13 @@ jobs:
       working-directory: ${{github.workspace}}/build_${{matrix.arch}}
       run: cpack -G ZIP -C ${{env.BUILD_TYPE}}
 
-    - name: Copy files to be uploaded to root
-      shell: bash
-      run: |
-        cp -r ${{github.workspace}}/build_${{matrix.arch}}/_CPack_Packages/*/ZIP/* ${{github.workspace}}/dist
-        rm ${{github.workspace}}/dist/*.zip
-
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.3.3
       with:
         name: nsui_banner_fixer_CPACK_${{env.BUILD_TYPE}}_${{matrix.arch}}
-        path: ${{github.workspace}}/dist/*
+        path: |
+          ${{github.workspace}}/build_${{matrix.arch}}/_CPack_Packages/win32/ZIP/*
+          ${{github.workspace}}/build_${{matrix.arch}}/_CPack_Packages/win64/ZIP/*
+          !${{github.workspace}}/build_${{matrix.arch}}/_CPack_Packages/*/ZIP/*.zip
+        if-no-files-found: ignore
+          
