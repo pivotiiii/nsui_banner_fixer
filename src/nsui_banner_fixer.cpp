@@ -92,7 +92,7 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &set
                 return 1;
             }
             if (!fs::exists(fs::absolute(fs::path(ciaArg.getValue())))) {
-                std::cerr << "ERROR: cannot find the specified .cia file!\n";
+                std::cerr << "ERROR: cannot find the specified .cia file! (" << ciaArg.getValue() << ")\n";
                 return 1;
             }
             cias.push_back(fs::absolute(fs::path(ciaArg.getValue())));
@@ -155,22 +155,33 @@ int main(int argc, char* argv[])
     struct resultS {
         fs::path cia;
         bool result;
+        std::string message;
     };
     std::vector<struct resultS> results;
 
     for (const auto &path : cia_paths) {
         struct resultS res = {path, false};
-        res.result = Game(path, set).fix_banner();
+        try {
+            res.result = Game(path, set).fix_banner();
+        } catch (const std::system_error &e) { // this happens if e.g. the console is set to russian codepage and the cia path contains an accent somewhere
+            res.message = e.what();
+            res.message.append("\nSometimes this happens if your OS is set to a language other than English and the cia path contains accents or other special characters "
+                               "(Both the full path to the folder the .cia file is in as well as the file itself). "
+                               "If this is the case, please try renaming and moving the .cia file to a location without these characters, e.g. \"C:/\" and running again there.");
+            res.cia = fs::relative(fs::current_path() / "path" / "with" / "problems");
+            res.result = false;
+        }
+
         results.push_back(res);
     }
 
     for (const auto &res : results) {
         if (res.result == false) {
-            std::cerr << "ERROR: There was a problem processing " << res.cia << "\n";
+            std::cerr << "ERROR: There was a problem processing " << res.cia.string() << "\n"
+                      << res.message;
         }
     }
 
     pause_if_double_clicked();
-
     return 0;
 }
