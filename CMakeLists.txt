@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28.3)
 project(
     nsui_banner_fixer 
-    VERSION 2.1.0
+    VERSION 2.1.1
     DESCRIPTION "Fixes banners for GBA forwarders generated with NSUIv28 on non-US consoles."
     LANGUAGES C CXX)
 
