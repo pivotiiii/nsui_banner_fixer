@@ -1,4 +1,11 @@
-add_executable(nsui_banner_fixer nsui_banner_fixer.cpp)
+add_executable(
+        nsui_banner_fixer WIN32 
+        nsui_banner_fixer.hpp
+        nsui_banner_fixer.cpp 
+        ArgsParser.hpp 
+        ArgsParser.cpp 
+        UI.hpp 
+        UI.cpp)
 target_compile_features(nsui_banner_fixer PRIVATE cxx_std_20)
 
 target_compile_definitions(nsui_banner_fixer PRIVATE VERSION=\"${CMAKE_PROJECT_VERSION}\")
@@ -7,6 +14,8 @@ target_compile_definitions(nsui_banner_fixer PRIVATE YEAR="${year}")
 string(TIMESTAMP compile_time "%Y-%m-%d %H:%M:%S UTC" UTC)
 target_compile_definitions(nsui_banner_fixer PRIVATE COMPILE_TIME="${compile_time}")
 
+target_compile_definitions(nsui_banner_fixer PUBLIC -DB_PRODUCTION_MODE=ON)
+
 add_library(nsui_banner_fixer_game 
             Game.hpp 
             Game.cpp 
@@ -14,7 +23,16 @@ add_library(nsui_banner_fixer_game
 target_compile_features(nsui_banner_fixer_game PRIVATE cxx_std_20)
 target_include_directories(nsui_banner_fixer_game INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game TCLAP)
+target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game TCLAP webview tinyfiledialogs)
+
+b_embed(nsui_banner_fixer ui/index.html)
+b_embed(nsui_banner_fixer ui/script.js)
+b_embed(nsui_banner_fixer ui/style.css)
+b_embed(nsui_banner_fixer ui/windows-ui/windows-ui.min.css)
+# b_embed(nsui_banner_fixer ui/windows-ui/windows-ui.min.js)
+b_embed(nsui_banner_fixer ui/windows-ui/winui-icons.min.css)
+b_embed(nsui_banner_fixer ui/windows-ui/config/app-config.css)
+
 
 #----------------------------------------------------------------------------------------
 # Windows

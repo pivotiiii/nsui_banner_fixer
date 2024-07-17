@@ -8,6 +8,7 @@
 #if defined(_WIN32)
 
 #include <boost/process.hpp>
+#include <boost/process/windows.hpp>
 #include <regex>
 
 namespace bp = boost::process;
@@ -21,7 +22,8 @@ namespace bp = boost::process;
         std::string line;                                                 \
         int retval = bp::system(bp::exe = exec,                           \
                                 bp::args = arg_list,                      \
-                                bp::std_out > output_stream);             \
+                                bp::std_out > output_stream,              \
+                                ::boost::process::windows::hide);         \
                                                                           \
         if (retval != ret_code) {                                         \
             while (std::getline(output_stream, line)) {                   \
@@ -89,7 +91,8 @@ versionS Game::get_version()
     bp::system(bp::exe = set.ctrtool.string(),
                bp::args = {"-i",
                            this->cia_path.string()},
-               bp::std_out > output_stream);
+               bp::std_out > output_stream,
+               ::boost::process::windows::hide);
 
     while (std::getline(output_stream, line)) {
         if (line.starts_with("Title version:")) {

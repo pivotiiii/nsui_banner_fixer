@@ -12,6 +12,37 @@ list(APPEND CMAKE_MODULE_PATH "${cmakehelpers_SOURCE_DIR}")
 #----------------------------------------------------------------------------------------
 
 FetchContent_Declare(
+    webview-download
+    GIT_REPOSITORY https://github.com/Michaelzhouisnotwhite/webview-cmake.git
+    GIT_TAG main
+    UPDATE_DISCONNECTED 1
+)
+FetchContent_MakeAvailable(webview-download)
+execute_process(
+    COMMAND git apply "${CMAKE_CURRENT_SOURCE_DIR}/patches/webviewcc.patch"
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/_deps/webviewcc-src"
+    ERROR_QUIET)
+
+FetchContent_Declare(
+  battery-embed
+  GIT_REPOSITORY https://github.com/batterycenter/embed.git
+  GIT_TAG        fdbae3fa33e96824726b68d9a8f64ba6be3833c6
+)
+FetchContent_MakeAvailable(battery-embed)
+
+FetchContent_Declare(
+    tinyfiledialogs-download
+    GIT_REPOSITORY  https://git.code.sf.net/p/tinyfiledialogs/code tinyfiledialogs-code
+    GIT_TAG         29c1b354d75825209adf8cc1979c425885a64d32
+)
+FetchContent_MakeAvailable(tinyfiledialogs-download)
+add_library(tinyfiledialogs STATIC "${tinyfiledialogs-download_SOURCE_DIR}/tinyfiledialogs.c")
+target_include_directories(tinyfiledialogs PUBLIC "${tinyfiledialogs-download_SOURCE_DIR}")
+
+
+#----------------------------------------------------------------------------------------
+
+FetchContent_Declare(
     tclap
     GIT_REPOSITORY      https://git.code.sf.net/p/tclap/code
     GIT_TAG             4dd8ae4d5c7354db2f38acd76a226e593522c68f #
