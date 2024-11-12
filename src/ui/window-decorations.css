@@ -1,0 +1,244 @@
+html,
+body {
+    height: calc(100vh - var(--window-bar-height));
+}
+
+
+:root {
+    --window-bar-close-button-hover-color: red;
+    --window-bar-close-button-click-color: rgb(197, 0, 0);
+    --window-bar-background-color: rgb(17, 17, 17);
+    --window-bar-button-hover-color: gray;
+    --window-bar-button-click-color: rgb(97, 97, 97);
+    --window-bar-button-width: 48px;
+    --window-bar-height: 32px;
+    --resize-bar-size: 5px;
+    --resize-corner-size: 16px;
+}
+
+.resize-bar-hor {
+    width: 100%;
+    height: var(--resize-bar-size);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.resize-bar-hor-bottom {
+    position: absolute;
+    bottom: 0%;
+}
+
+.resize-bar-hor-center {
+    width: 100%;
+    height: 100%;
+}
+
+.resize-bar-hor-corner {
+    width: var(--resize-corner-size);
+    height: 100%;
+}
+
+.resize-bar-ver {
+    width: var(--resize-bar-size);
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+.resize-bar-ver-center {
+    width: 100%;
+    height: 100%;
+}
+
+.resize-bar-ver-corner {
+    width: 100%;
+    height: var(--resize-corner-size);
+}
+
+#windowBarContainer {
+    height: var(--window-bar-height);
+    width: 100%;
+    background-color: var(--window-bar-background-color);
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+}
+
+/*#windowBarContainer>div>div {
+    border: 1px solid rgb(255, 0, 255);
+}
+
+#windowBarContainer>div>div>div {
+    border: 1px solid rgb(255, 0, 255);
+}*/
+
+#windowBarLeftResizeContainer {
+    width: var(--resize-bar-size);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+#windowBarLeftCornerResize {
+    height: var(--resize-corner-size);
+    width: 100%;
+}
+
+#windowBarLeftResize {
+    height: 100%;
+    width: 100%;
+}
+
+#windowBarCenterContainer {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+#windowBarCenterResizeContainer {
+    width: 100%;
+    height: var(--resize-bar-size);
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+}
+
+#windowBarCenterLeftResize {
+    width: var(--resize-corner-size);
+    height: var(--resize-bar-size);
+}
+
+#windowBarCenterTopResize {
+    width: 100%;
+    height: var(--resize-bar-size);
+}
+
+#windowBarCenter {
+    width: 100%;
+    height: 100%;
+}
+
+.window-bar-button-container {
+    width: var(--window-bar-button-width);
+    height: 100%;
+    line-height: 100%;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    transition: 0.2s;
+    background-color: var(--window-bar-background-color);
+}
+
+.window-bar-button-container:not(#closeButtonContainer):hover {
+    background-color: var(--window-bar-button-hover-color);
+}
+
+.window-bar-button-container:not(#closeButtonContainer):active {
+    background-color: var(--window-bar-button-click-color);
+}
+
+.window-bar-button-resize {
+    width: 100%;
+    height: var(--resize-bar-size);
+}
+
+.window-bar-button {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#closeButtonResizeTopContainer {
+    width: 100%;
+    height: var(--resize-bar-size);
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+}
+
+#closeButtonResizeTop {
+    width: 100%;
+    height: 100%;
+}
+
+#closeButtonResizeTopCorner {
+    width: var(--resize-corner-size);
+    height: 100%;
+}
+
+#closeButtonContainer2 {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+}
+
+#closeButtonResizeRightContainer {
+    width: var(--resize-bar-size);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+#closeButtonResizeRightCorner {
+    width: var(--resize-bar-size);
+    height: var(--resize-corner-size);
+}
+
+#closeButtonResizeRight {
+    width: var(--resize-bar-size);
+    height: 100%;
+}
+
+#closeButtonContainer:hover {
+    background-color: var(--window-bar-close-button-hover-color);
+}
+
+#closeButtonContainer:active {
+    background-color: var(--window-bar-close-button-click-color);
+}
+
+div[data-webview-resize="l"],
+div[data-webview-resize="r"] {
+    cursor: ew-resize;
+}
+
+div[data-webview-resize="t"],
+div[data-webview-resize="b"] {
+    cursor: ns-resize;
+}
+
+div[data-webview-resize="tl"],
+div[data-webview-resize="br"] {
+    cursor: nwse-resize;
+}
+
+div[data-webview-resize="tr"],
+div[data-webview-resize="bl"] {
+    cursor: nesw-resize;
+}
+
+#window {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#windowWorkspace {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}

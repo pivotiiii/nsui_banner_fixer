@@ -4,22 +4,22 @@
 #include <mutex>
 #include <vector>
 
-#include "webview.h"
+#include <saucer/smartview.hpp>
 
 #include "Settings.hpp"
 #include "nsui_banner_fixer.hpp"
 
 class UI {
   private:
-    std::unique_ptr<webview::webview> wp;
     Settings set;
     std::vector<Cia_File> cia_files;
-    std::string css;
-    std::string script;
-    std::string html_nsui;
-    std::string html_license;
 
-    std::string build_final_html(std::string &html);
+    std::shared_ptr<saucer::application> app;
+    saucer::smartview<saucer::serializers::glaze::serializer> smartview;
+
+    void quit();
+
+    /*std::string build_final_html(std::string &html);
     void load_nsui_page();
     void add_path(const std::filesystem::path &path);
     void remove_path(const std::filesystem::path &path);
@@ -29,7 +29,7 @@ class UI {
     void bind_add_cias();
     void bind_remove_cia();
     void bind_fix_banners();
-    void bind_set_replace_files();
+    void bind_set_replace_files();*/
 
   public:
     UI(Settings &set);

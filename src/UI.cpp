@@ -5,12 +5,66 @@
 #include "Game.hpp"
 #include "UI.hpp"
 
-#include "battery/embed.hpp"
+#include <embedded/all.hpp>
+
 #include "tinyfiledialogs.h"
 
 namespace fs = std::filesystem;
 
 UI::UI(Settings &set)
+    : app {saucer::application::acquire({.id = "nsui-banner-fixer"})},
+      smartview {{.application = app}}
+{
+    this->set = set;
+    this->set.replace = false;
+    std::vector<fs::path> cia_paths;
+    get_cia_files("", cia_paths);
+    for (const auto &path : cia_paths) {
+        cia_files.push_back(Cia_File(path));
+    }
+
+    smartview.set_title("NSUI Banner Fixer");
+    smartview.set_decorations(false);
+    smartview.set_context_menu(false);
+    smartview.set_min_size(460, 350);
+    smartview.set_size(800, 550);
+
+    smartview.set_dev_tools(true);
+
+    smartview.embed(saucer::embedded::all());
+
+    smartview.expose("quit", [&]() {
+        this->app->quit();
+    });
+
+    smartview.expose("maximize", [&]() {
+        smartview.set_maximized(true);
+    });
+
+    smartview.expose("not_maximize", [&]() {
+        smartview.set_maximized(false);
+    });
+
+    smartview.expose("minimize", [&]() {
+        smartview.set_minimized(true);
+    });
+
+    smartview.serve("index.html");
+    smartview.show();
+    smartview.execute("console.log({})", std::vector<int> {10});
+    app->run();
+}
+
+UI::~UI()
+{
+}
+
+void UI::quit()
+{
+    this->app->quit();
+}
+
+/*UI::UI(Settings &set)
 {
     this->set = set;
     this->set.replace = false;
@@ -181,4 +235,4 @@ void UI::bind_fix_banners()
 
         return retVal;
     });
-}
+}*/

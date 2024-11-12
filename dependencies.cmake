@@ -11,24 +11,22 @@ list(APPEND CMAKE_MODULE_PATH "${cmakehelpers_SOURCE_DIR}")
 
 #----------------------------------------------------------------------------------------
 
-FetchContent_Declare(
-    webview-download
-    GIT_REPOSITORY https://github.com/Michaelzhouisnotwhite/webview-cmake.git
-    GIT_TAG main
-    UPDATE_DISCONNECTED 1
-)
-FetchContent_MakeAvailable(webview-download)
+find_program(npm_EXE npm REQUIRED)
+message("${npm_EXE}.cmd install @saucer-dev/cli")
 execute_process(
-    COMMAND git apply "${CMAKE_CURRENT_SOURCE_DIR}/patches/webviewcc.patch"
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/_deps/webviewcc-src"
-    ERROR_QUIET)
+    COMMAND ${npm_EXE}.cmd install @saucer-dev/cli #Windows specific with the .cmd
+    OUTPUT_VARIABLE npm_OUTPUT
+)
+message(${npm_OUTPUT})
+
 
 FetchContent_Declare(
-  battery-embed
-  GIT_REPOSITORY https://github.com/batterycenter/embed.git
-  GIT_TAG        fdbae3fa33e96824726b68d9a8f64ba6be3833c6
+    saucer 
+    GIT_REPOSITORY "https://github.com/saucer/saucer" 
+    GIT_TAG v4.2.0
 )
-FetchContent_MakeAvailable(battery-embed)
+FetchContent_MakeAvailable(saucer)
+
 
 FetchContent_Declare(
     tinyfiledialogs-download
