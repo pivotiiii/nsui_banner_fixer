@@ -9,7 +9,7 @@ option(BUILD_TESTS "Build tests." ON)
 option(DYNAMIC_LINKING "Link CURL and OPENSSL dynamic instead of static. (Linux only)" OFF)
 option(STATIC_STD_LIBS "Link libstdc++ and libgcc static instead of dynamic. (Linux only)" OFF)
 
-add_compile_definitions(-DB_PRODUCTION_MODE=ON)
+#add_compile_definitions(-DB_PRODUCTION_MODE=ON)
 
 include(dependencies.cmake)
 add_subdirectory(src)

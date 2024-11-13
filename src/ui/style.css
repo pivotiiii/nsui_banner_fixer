@@ -1,1 +1,33 @@
-/* WinUI Overwrites, should be seperate file*/
+.app-alert-bar {
+    position: absolute;
+    bottom: -15%;
+    left: 20%;
+    width: 60%;
+    transition: 0.5s;
+}
+
+.app-alert-bar-active {
+    bottom: 5%;
+}
+
+.alert-bar-success {
+    background-color: rgba(27, 46, 25, 1);
+}
+
+.alert-bar-danger {
+    background-color: rgba(46, 24, 26, 1);
+}
+
+#buttonsDiv {
+    padding-top: 5px;
+    padding-bottom: 50px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#checkboxDiv {
+    padding-top: 10px;
+    flex-direction: row;
+    justify-content: left;
+}

@@ -30,14 +30,21 @@
             <div id="windowBarCenter" data-webview-drag></div>
         </div>
 
+        <div id="colorButtonContainer" class="window-bar-button-container">
+            <div id="colorButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
+            <div id="colorButton" class="window-bar-button"><i class="icons10-sun"></i></div>
+        </div>
+
         <div id="minButtonContainer" class="window-bar-button-container">
             <div id="minButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
-            <div id="minButton" class="window-bar-button">-</div>
+            <div id="minButton" class="window-bar-button"><i class="icons10-minus"></i></div>
         </div>
 
         <div id="maxButtonContainer" class="window-bar-button-container">
             <div id="maxButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
-            <div id="maxButton" class="window-bar-button">O</div>
+            <div id="maxButton" class="window-bar-button">
+                <i class="qlementine-icons--windows-maximize-16"></i>
+            </div>
         </div>
 
         <div id="closeButtonContainer" class="window-bar-button-container">
@@ -47,7 +54,7 @@
                 </div>
             </div>
             <div id="closeButtonContainer2">
-                <div id="closeButton" class="window-bar-button">X</div>
+                <div id="closeButton" class="window-bar-button"><i class="icons10-cross"></i></div>
                 <div id="closeButtonResizeRightContainer">
                     <div id="closeButtonResizeRightCorner" data-webview-resize="tr">
                     </div>
@@ -95,8 +102,7 @@
                 </div>
 
                 <div class="no-scroll" style="margin-bottom: 20px;">
-                    <div id="checkboxDiv"
-                        style="padding-top: 10px; display: none; flex-direction: row; justify-content: left;">
+                    <div id="checkboxDiv" style="display: none;">
                         <label class="app-switch">
                             <input type="checkbox" id="checkboxReplace" />
                             <div class="app-switch-view"></div>
@@ -105,8 +111,7 @@
                     </div>
                     <div class="app-hr" id="hr2"></div>
 
-                    <div id="buttonsDiv"
-                        style="padding-top: 5px; display: flex; flex-direction: row; justify-content: space-between; ">
+                    <div id="buttonsDiv">
                         <button class="app-btn app-btn-function app-btn-primary" id="addBtn" type="button">
                             <i class="icons10-plus"></i>
                             <span>Add .cia files</span>
@@ -132,11 +137,29 @@
         <div id="resizeBottomRight" class="resize-bar-hor-corner" data-webview-resize="br"></div>
     </div>
 
+    <div id="successBar" class="app-alert-bar alert-bar-success" role="alert">
+        <i class="icons10-checkmark app-color-success"></i>
+        <strong class="app-color-success">Success</strong><!--<span>This is a text</span>-->
+        <div class="app-alert-bar-end-content">
+            <button id="alertCloseButtonSuccess" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div id="dangerBar" class="app-alert-bar alert-bar-danger" role="alert">
+        <i class="icons10-cross app-color-danger"></i>
+        <strong class="app-color-danger">Error</strong><span>This is a text</span>
+        <div class="app-alert-bar-end-content">
+            <button id="alertCloseButtonError" aria-label="Close"></button>
+        </div>
+    </div>
+
 
 
 
 
 </body>
+<script type="text/javascript" src="windows-ui/windows-ui.min.js"></script>
 <script type="text/javascript" src="window-decorations.js"></script>
+<script type="text/javascript" src="script.js"></script>
 
 </html>

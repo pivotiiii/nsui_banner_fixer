@@ -11,6 +11,16 @@
 
 namespace fs = std::filesystem;
 
+bool containsOnlyASCII(const std::string &filePath)
+{
+    for (auto c : filePath) {
+        if (static_cast<unsigned char>(c) > 127) {
+            return false;
+        }
+    }
+    return true;
+}
+
 UI::UI(Settings &set)
     : app {saucer::application::acquire({.id = "nsui-banner-fixer"})},
       smartview {{.application = app}}
@@ -23,82 +33,41 @@ UI::UI(Settings &set)
         cia_files.push_back(Cia_File(path));
     }
 
-    smartview.set_title("NSUI Banner Fixer");
-    smartview.set_decorations(false);
-    smartview.set_context_menu(false);
-    smartview.set_min_size(460, 350);
-    smartview.set_size(800, 550);
+    this->smartview.set_title("NSUI Banner Fixer");
+    this->smartview.set_decorations(false);
+    this->smartview.set_context_menu(false);
+    this->smartview.set_min_size(460, 425);
+    this->smartview.set_size(800, 550);
 
-    smartview.set_dev_tools(true);
+    this->smartview.set_dev_tools(true);
 
-    smartview.embed(saucer::embedded::all());
+    this->smartview.embed(saucer::embedded::all());
 
-    smartview.expose("quit", [&]() {
+    this->smartview.expose("quit", [&]() {
         this->app->quit();
     });
 
-    smartview.expose("maximize", [&]() {
-        smartview.set_maximized(true);
+    this->smartview.expose("maximize", [&]() {
+        this->smartview.set_maximized(true);
     });
 
-    smartview.expose("not_maximize", [&]() {
-        smartview.set_maximized(false);
+    this->smartview.expose("not_maximize", [&]() {
+        this->smartview.set_maximized(false);
     });
 
-    smartview.expose("minimize", [&]() {
-        smartview.set_minimized(true);
+    this->smartview.expose("minimize", [&]() {
+        this->smartview.set_minimized(true);
     });
 
-    smartview.serve("index.html");
-    smartview.show();
-    smartview.execute("console.log({})", std::vector<int> {10});
-    app->run();
-}
+    this->bind_add_cias();
+    this->bind_remove_cia();
+    this->bind_set_replace_files();
+    this->bind_fix_banners();
 
-UI::~UI()
-{
-}
+    this->smartview.serve("index.html");
+    this->smartview.show();
 
-void UI::quit()
-{
-    this->app->quit();
-}
-
-/*UI::UI(Settings &set)
-{
-    this->set = set;
-    this->set.replace = false;
-    std::vector<fs::path> cia_paths;
-    get_cia_files("", cia_paths);
-    for (const auto &path : cia_paths) {
-        cia_files.push_back(Cia_File(path));
-    }
-
-    std::string css_style = b::embed<"ui/windows-ui/windows-ui.min.css">();
-    std::string css_icons = b::embed<"ui/windows-ui/winui-icons.min.css">();
-    std::string css_config = b::embed<"ui/windows-ui/config/app-config.css">();
-    std::string css_overwrites = b::embed<"ui/style.css">();
-    std::string js_ui = ""; // b::embed<"ui/windows-ui/windows-ui.min.js">();
-    std::string js = b::embed<"ui/script.js">();
-
-    css = "<style>" + css_config + css_icons + css_style + css_overwrites + "</style>";
-    script = "<script>" + js + js_ui + "</script>";
-
-    html_nsui = b::embed<"ui/index.html">();
-    html_nsui = build_final_html(html_nsui);
-
-    wp = std::make_unique<webview::webview>(false, nullptr);
-    wp->set_title("NSUI Banner Fixer");
-
-    bind_add_cias();
-    bind_remove_cia();
-    bind_fix_banners();
-    bind_set_replace_files();
-
-    load_nsui_page();
-    wp->set_size(400, 400, WEBVIEW_HINT_MIN);
-
-    wp->run();
+    this->app->run();
 }
 
 UI::~UI()
@@ -151,24 +120,10 @@ std::string UI::build_path_json(bool show_results = false)
     return retVal;
 }
 
-std::string UI::build_final_html(std::string &html)
-{
-    const std::string style_placeholder = "<!--STYLE-->";
-    std::string html_out = html.replace(html.find(style_placeholder), style_placeholder.length(), this->css);
-    const std::string script_placeholder = "<!--SCRIPT-->";
-    html_out = html_out.replace(html_out.find(script_placeholder), script_placeholder.length(), script);
-    return html_out;
-}
-
-void UI::load_nsui_page()
-{
-    wp->set_html(html_nsui);
-}
-
 void UI::bind_add_cias()
 {
 
-    wp->bind("add_cias", [&](const std::string &req = "") -> std::string {
+    this->smartview.expose("add_cias", [&](const std::string &req = "") -> std::string {
         std::vector<const char*> file_terminators = {"*.cia"};
         const char* output = tinyfd_openFileDialog(
             "Select .cia files to fix.",
@@ -191,35 +146,49 @@ void UI::bind_add_cias()
 
 void UI::bind_remove_cia()
 {
-    wp->bind("remove_cia", [&](const std::string &req) -> std::string {
+    /*this->smartview.expose("remove_cia", [&](const std::string &req) -> std::string {
         remove_path(std::stoi(req.substr(1, req.size() - 1)));
+        return build_path_json();
+    });*/
+    this->smartview.expose("remove_cia", [&](const int &req) -> std::string {
+        remove_path(req);
         return build_path_json();
     });
 }
 
 void UI::bind_set_replace_files()
 {
-    wp->bind("set_replace_files", [&](const std::string &replace) -> std::string {
-        if (replace.substr(1, replace.size() - 2) == "true") {
-            this->set.replace = true;
-        } else {
-            this->set.replace = false;
-        }
-        return "";
+    this->smartview.expose("set_replace_files", [&](const bool &replace) {
+        this->set.replace = replace;
     });
 }
 
 void UI::bind_fix_banners()
 {
-    wp->bind("fix_banners", [&](const std::string &replace) -> std::string {
+    this->smartview.expose("fix_banners", [&]() -> std::string {
         std::vector<Cia_File> results;
 
         for (const Cia_File &file : this->cia_files) {
-            results.push_back(fix_cia(file.path, this->set));
+            auto result = fix_cia(file.path, this->set);
+
+            if (result.result == false && !containsOnlyASCII(result.path.string())) {
+                result.message = "ASCII Error";
+            } else if (result.result == false) {
+                result.message = "not v28 Error";
+            }
+
+            results.push_back(result);
         }
         this->cia_files = results;
 
+        for (const auto &res : results) {
+            this->smartview.execute("console.log(\"wowza\")");
+            this->smartview.execute("console.log(" + res.message + ")");
+        }
+
         return build_path_json(true);
+
+        // add error messages
 
         std::string files, result_bools_string, messages;
         for (const auto &result : results) {
@@ -235,4 +204,4 @@ void UI::bind_fix_banners()
 
         return retVal;
     });
-}*/
+}
