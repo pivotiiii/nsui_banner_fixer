@@ -19,6 +19,7 @@ body {
     --window-bar-height: 32px;
     --resize-bar-size: 5px;
     --resize-corner-size: 16px;
+    --border-color: var(--dark, #333333) var(--light, #666666);
 }
 
 .visible-darkmode {
@@ -54,9 +55,10 @@ body {
 
 .resize-bar-ver {
     width: var(--resize-bar-size);
+    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: start;
+    justify-content: center;
 }
 
 .resize-bar-ver-center {
@@ -67,6 +69,30 @@ body {
 .resize-bar-ver-corner {
     width: 100%;
     height: var(--resize-corner-size);
+}
+
+.window-edge-top {
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-top-color: var(--border-color);
+}
+
+.window-edge-left {
+    border-left-width: 1px;
+    border-left-style: solid;
+    border-left-color: var(--border-color);
+}
+
+.window-edge-right {
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-right-color: var(--border-color);
+}
+
+.window-edge-bottom {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: var(--border-color);
 }
 
 #windowBarContainer {
@@ -144,8 +170,11 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: start;
-    transition: 0.2s;
     background-color: var(--window-bar-background-color);
+}
+
+.window-bar-button-container:hover {
+    transition: 0.2s background-color;
 }
 
 .window-bar-button-container:not(#closeButtonContainer):hover {
