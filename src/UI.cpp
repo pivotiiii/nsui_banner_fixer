@@ -28,11 +28,6 @@ UI::UI(Settings &set)
 {
     this->set = set;
     this->set.replace = false;
-    std::vector<fs::path> cia_paths;
-    get_cia_files("", cia_paths);
-    for (const auto &path : cia_paths) {
-        cia_files.push_back(Cia_File(path));
-    }
 
     this->smartview.set_title("NSUI Banner Fixer");
     this->smartview.set_decorations(false);
@@ -46,6 +41,21 @@ UI::UI(Settings &set)
 
     auto icon = saucer::icon::from(saucer::embedded::all().at("icon2.ico").content);
     this->smartview.set_icon(icon.value());
+
+    this->expose_functions();
+
+    this->smartview.serve("index.html");
+    this->smartview.show();
+
+    this->app->run();
+}
+
+UI::~UI()
+{
+}
+
+void UI::expose_functions()
+{
     this->smartview.expose("quit", [&]() {
         this->app->quit();
     });
@@ -62,19 +72,21 @@ UI::UI(Settings &set)
         this->smartview.set_minimized(true);
     });
 
-    this->bind_add_cias();
-    this->bind_remove_cia();
-    this->bind_set_replace_files();
-    this->bind_fix_banners();
+    this->smartview.expose("add_cias", [&]() -> std::string {
+        return this->add_cias();
+    });
 
-    this->smartview.serve("index.html");
-    this->smartview.show();
+    this->smartview.expose("remove_cia", [&](const int &req) -> std::string {
+        return this->remove_cia(req);
+    });
 
-    this->app->run();
-}
+    this->smartview.expose("set_replace_files", [&](const bool &replace) {
+        this->set_replace_files(replace);
+    });
 
-UI::~UI()
-{
+    this->smartview.expose("fix_banners", [&]() -> std::string {
+        return this->fix_banners();
+    });
 }
 
 void UI::add_path(const fs::path &path)
@@ -123,10 +135,8 @@ std::string UI::build_path_json(bool show_results = false)
     return retVal;
 }
 
-void UI::bind_add_cias()
+std::string UI::add_cias()
 {
-
-    this->smartview.expose("add_cias", [&](const std::string &req = "") -> std::string {
         std::vector<const char*> file_terminators = {"*.cia"};
         const char* output = tinyfd_openFileDialog(
             "Select .cia files to fix.",
@@ -144,31 +154,21 @@ void UI::bind_add_cias()
             }
         }
         return build_path_json();
-    });
 }
 
-void UI::bind_remove_cia()
+std::string UI::remove_cia(const int &req)
 {
-    /*this->smartview.expose("remove_cia", [&](const std::string &req) -> std::string {
-        remove_path(std::stoi(req.substr(1, req.size() - 1)));
-        return build_path_json();
-    });*/
-    this->smartview.expose("remove_cia", [&](const int &req) -> std::string {
         remove_path(req);
         return build_path_json();
-    });
 }
 
-void UI::bind_set_replace_files()
+void UI::set_replace_files(const bool &replace)
 {
-    this->smartview.expose("set_replace_files", [&](const bool &replace) {
         this->set.replace = replace;
-    });
 }
 
-void UI::bind_fix_banners()
+std::string UI::fix_banners()
 {
-    this->smartview.expose("fix_banners", [&]() -> std::string {
         std::vector<Cia_File> results;
 
         for (const Cia_File &file : this->cia_files) {
@@ -206,5 +206,5 @@ void UI::bind_fix_banners()
         std::string retVal = std::format("{{\"files\": [{}], \"results\": [{}], \"messages\": [{}]}}", files, result_bools_string, messages);
 
         return retVal;
-    });
+
 }
