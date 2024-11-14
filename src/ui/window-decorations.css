@@ -12,13 +12,21 @@ body {
 :root {
     --window-bar-close-button-hover-color: red;
     --window-bar-close-button-click-color: rgb(197, 0, 0);
-    --window-bar-background-color: rgb(17, 17, 17);
-    --window-bar-button-hover-color: gray;
-    --window-bar-button-click-color: rgb(100, 100, 100);
+    --window-bar-background-color: var(--dark, rgb(17, 17, 17)) var(--light, rgb(255, 255, 255));
+    --window-bar-button-hover-color: var(--dark, #262626) var(--light, #E8E8E8);
+    --window-bar-button-click-color: var(--dark, #353535) var(--light, #cacaca);
     --window-bar-button-width: 48px;
     --window-bar-height: 32px;
     --resize-bar-size: 5px;
     --resize-corner-size: 16px;
+}
+
+.visible-darkmode {
+    display: var(--dark, initial) var(--light, none);
+}
+
+.visible-lightmode {
+    display: var(--dark, none) var(--light, initial);
 }
 
 .resize-bar-hor {
