@@ -34,7 +34,6 @@ add_subdirectory(ui)
 #----------------------------------------------------------------------------------------
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
-        #target_sources(nsui_banner_fixer_game PRIVATE GameWin.cpp)
         target_link_libraries(nsui_banner_fixer_game PRIVATE Boost::process)
         add_custom_command(
                 TARGET nsui_banner_fixer POST_BUILD
@@ -45,6 +44,9 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
                         ${ctrtool_SOURCE_DIR}/ctrtool.exe
                         ${makerom_SOURCE_DIR}/makerom.exe
                         $<TARGET_FILE_DIR:nsui_banner_fixer>/tools)
+
+        #use utf8 codepage, makes filename like Pok_é_mon work
+        target_sources(nsui_banner_fixer PRIVATE utf8.manifest)
 endif()
 
 #----------------------------------------------------------------------------------------
@@ -88,12 +90,14 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
         target_link_libraries(nsui_banner_fixer_game PRIVATE makerom_lib)
 endif()
 
-
+#----------------------------------------------------------------------------------------
+# Resources
+#----------------------------------------------------------------------------------------
 
 include(generate_product_version)
 generate_product_version(ProductVersionFiles
                         NAME ${CMAKE_PROJECT_NAME}
-                        ICON ${CMAKE_SOURCE_DIR}/resources/icon.ico
+                        ICON ${CMAKE_SOURCE_DIR}/src/ui/icon2.ico #resources/icon.ico
                         VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR}
                         VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR}
                         VERSION_PATCH ${CMAKE_PROJECT_VERSION_PATCH}

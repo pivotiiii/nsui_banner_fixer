@@ -23,7 +23,8 @@ bool containsOnlyASCII(const std::string &filePath)
 
 UI::UI(Settings &set)
     : app {saucer::application::acquire({.id = "nsui-banner-fixer"})},
-      smartview {{.application = app}}
+      smartview {{.application = app,
+                  .persistent_cookies = false}}
 {
     this->set = set;
     this->set.replace = false;
@@ -43,6 +44,8 @@ UI::UI(Settings &set)
 
     this->smartview.embed(saucer::embedded::all());
 
+    auto icon = saucer::icon::from(saucer::embedded::all().at("icon2.ico").content);
+    this->smartview.set_icon(icon.value());
     this->smartview.expose("quit", [&]() {
         this->app->quit();
     });
