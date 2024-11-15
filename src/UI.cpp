@@ -46,7 +46,7 @@ UI::UI(Settings &set)
                   .persistent_cookies = false}}
 {
     this->set = set;
-    this->set.replace = false;
+    this->set.replace = true;
 
     this->smartview.set_title("NSUI Banner Fixer");
     this->smartview.set_decorations(false);
