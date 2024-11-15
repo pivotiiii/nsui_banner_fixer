@@ -30,6 +30,11 @@
             <div id="windowBarCenter" data-webview-drag></div>
         </div>
 
+        <div id="infoButtonContainer" class="window-bar-button-container window-edge-top">
+            <div id="infoButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
+            <div id="infoButton" class="window-bar-button"><i class="qlementine-icons--info-16"></i></div>
+        </div>
+
         <div id="colorButtonContainer" class="window-bar-button-container window-edge-top">
             <div id="colorButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
             <div id="colorButton" class="window-bar-button"><i class="icons10-sun visible-darkmode"></i><i
@@ -154,14 +159,28 @@
         </div>
     </div>
 
-    <div class="app-alert app-dialog show" id="missingReqsAlert" tabindex="-1">
-        <div class="app-alert-modal" aria-modal="true" role="dialog">
-            <div class="app-alert-header">
+    <div class="app-alert app-dialog" id="missingReqsAlert" tabindex="-1">
+        <div class="app-alert-modal" aria-modal="true" role="dialog" id="missingReqsAlertBox">
+            <div class="app-alert-header" id="missingReqsAlertHeader">
                 <h1 class="app-color-danger"><i class="icons10-exclamation-mark"></i>Error</h1>
-                <div class="app-alert-message" id="missingReqsAlertText">error text</div>
+                <div class="app-alert-message" id="missingReqsAlertText">ERROR_TEXT</div>
             </div>
             <div class="app-alert-footer">
                 <button class="app-btn" id="missingReqsAlertCloseBtn">
+                    <span>OK</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-alert app-dialog" id="infoAlert" tabindex="-1">
+        <div class="app-alert-modal" id="infoAlertBox" aria-modal="true" role="dialog">
+            <div class="app-alert-header" id="infoAlertHeader">
+                <h1>Information</h1>
+                <div class="app-alert-message" id="infoAlertText">LICENSE_INFO</div>
+            </div>
+            <div class="app-alert-footer" id="infoAlertFooter">
+                <button class="app-btn" id="infoAlertCloseBtn">
                     <span>OK</span>
                 </button>
             </div>

@@ -39,23 +39,32 @@ if (BUILD_GUI)
         add_library(nsui_banner_fixer_ui 
                     UI.hpp 
                     UI.cpp 
-                    ${CMAKE_BINARY_DIR}/ui/embedded/all.hpp)
+                    ${CMAKE_CURRENT_BINARY_DIR}/ui/embedded/all.hpp)
 
-        target_include_directories(nsui_banner_fixer_ui PRIVATE ${CMAKE_BINARY_DIR}/ui)
+        target_include_directories(nsui_banner_fixer_ui PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/ui)
         target_include_directories(nsui_banner_fixer_ui INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
         target_compile_features(nsui_banner_fixer_ui PRIVATE cxx_std_23)
         set_target_properties(nsui_banner_fixer_ui PROPERTIES CXX_STANDARD 23 CXX_EXTENSIONS OFF CXX_STANDARD_REQUIRED ON)
 
+        target_compile_definitions(nsui_banner_fixer_ui PRIVATE VERSION=\"${CMAKE_PROJECT_VERSION}\")
+        target_compile_definitions(nsui_banner_fixer_ui PRIVATE YEAR="${year}")
+        target_compile_definitions(nsui_banner_fixer_ui PRIVATE COMPILE_TIME="${compile_time}")
+
         add_custom_command(
-            OUTPUT  ${CMAKE_BINARY_DIR}/ui/embedded/all.hpp
-            COMMAND npx.cmd saucer embed ${CMAKE_CURRENT_SOURCE_DIR}/ui ${CMAKE_BINARY_DIR}/ui/embedded >nul 2>&1 #windows only rn
+            OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/ui/embedded/all.hpp
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+            COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/embedded_files
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/ui ${CMAKE_CURRENT_BINARY_DIR}/embedded_files
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/LICENSE ${CMAKE_CURRENT_BINARY_DIR}/embedded_files/LICENSE.txt
+            COMMAND npx.cmd saucer embed ${CMAKE_CURRENT_BINARY_DIR}/embedded_files ${CMAKE_CURRENT_BINARY_DIR}/ui/embedded >nul 2>&1 #windows only rn
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ui/index.html
                     ${CMAKE_CURRENT_SOURCE_DIR}/ui/script.js
                     ${CMAKE_CURRENT_SOURCE_DIR}/ui/style.css
                     ${CMAKE_CURRENT_SOURCE_DIR}/ui/window-decorations.css
                     ${CMAKE_CURRENT_SOURCE_DIR}/ui/window-decorations.js
                     ${CMAKE_CURRENT_SOURCE_DIR}/ui/windows-ui-overwrites.css
+                    ${CMAKE_SOURCE_DIR}/LICENSE
             COMMENT "Generating embedded files for GUI"
         )
 

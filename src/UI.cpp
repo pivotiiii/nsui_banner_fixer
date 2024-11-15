@@ -1,5 +1,4 @@
 #include <format>
-#include <sstream>
 
 #include "Game.hpp"
 #include "UI.hpp"
@@ -7,6 +6,16 @@
 #include <embedded/all.hpp>
 
 #include "tinyfiledialogs.h"
+
+#ifndef VERSION
+#define VERSION "0.0.0"
+#endif
+#ifndef YEAR
+#define YEAR "0000"
+#endif
+#ifndef COMPILE_TIME
+#define COMPILE_TIME "0000-00-00 00:00:00 UTC"
+#endif
 
 namespace fs = std::filesystem;
 
@@ -18,6 +27,17 @@ bool containsOnlyASCII(const std::string &filePath)
         }
     }
     return true;
+}
+
+std::string replace_char_with_string(const std::string &str, char replaced, const std::string &replacement)
+{
+    std::string result = str;
+    std::size_t pos = str.find(replaced);
+    while (pos != std::string::npos) {
+        result.replace(pos, 1, replacement);                     // Replace the character with the replacement string
+        pos = result.find(replaced, pos + replacement.length()); // Find the next occurrence
+    }
+    return result;
 }
 
 UI::UI(Settings &set)
@@ -40,6 +60,9 @@ UI::UI(Settings &set)
 
     auto icon = saucer::icon::from(saucer::embedded::all().at("icon2.ico").content);
     this->smartview.set_icon(icon.value());
+
+    auto license_data = saucer::embedded::all().at("LICENSE.txt").content.data();
+    this->license = reinterpret_cast<const char*>(license_data);
 
     this->expose_functions();
 
@@ -89,6 +112,10 @@ void UI::expose_functions()
 
     this->smartview.expose("fix_banners", [&]() -> std::string {
         return this->fix_banners();
+    });
+
+    this->smartview.expose("get_program_info", [&]() -> std::string {
+        return this->get_program_info();
     });
 }
 
@@ -208,5 +235,16 @@ std::string UI::check_requirements()
     }
     missing_files = missing_files.substr(0, missing_files.size() - 1);
     std::string retVal = std::format("{{\"result\": {}, \"err_count\": {}, \"missing_files\": [{}]}}", (err_count == 0 ? "true" : "false"), err_count, missing_files);
+    return retVal;
+}
+
+std::string UI::get_program_info()
+{
+    std::string license_text = this->license;
+    license_text = replace_char_with_string(license_text, '\r', "");
+    license_text = replace_char_with_string(license_text, '\n', "<br>");
+    license_text = replace_char_with_string(license_text, '"', "\\\"");
+
+    std::string retVal = std::format("{{\"license\": \"{}\", \"compile_time\": \"{}\", \"year\": \"{}\", \"version\": \"{}\"}}", license_text, COMPILE_TIME, YEAR, VERSION);
     return retVal;
 }

@@ -2,7 +2,8 @@ const getElements = ids => Object.assign({}, ...ids.map(id => ({ [id]: document.
 const ui = getElements([
     "filesTableBody", "addBtn", "fixBtn", "tableContainer", "hr1", "hr2", "checkboxDiv", "checkboxReplace",
     "dangerBar", "successBar", "alertCloseButtonSuccess", "alertCloseButtonError",
-    "missingReqsAlert", "missingReqsAlertCloseBtn", "missingReqsAlertText"]);
+    "missingReqsAlert", "missingReqsAlertCloseBtn", "missingReqsAlertText",
+    "infoAlert", "infoAlertCloseBtn", "infoAlertText", "infoButtonContainer"]);
 
 ui.addBtn.addEventListener("click", async () => {
     ui.addBtn.classList.remove("app-btn-primary");
@@ -64,6 +65,26 @@ ui.missingReqsAlertCloseBtn.addEventListener("click", async () => {
 
 window.addEventListener("load", async () => {
     await checkRequirements();
+});
+
+ui.infoAlertCloseBtn.addEventListener("click", async () => {
+    ui.infoAlert.classList.remove("show");
+})
+
+ui.infoButtonContainer.addEventListener("click", async () => {
+    ui.infoAlert.classList.add("show");
+})
+
+window.addEventListener("load", async () => {
+    let program_info_json = await saucer.exposed.get_program_info();
+    let program_info = await JSON.parse(program_info_json);
+    console.log(program_info);
+    let license_html = program_info.license.split("<br>").slice(2).join("<br>");
+    ui.infoAlertText.innerHTML =
+        "nsui_banner_fixer v" + program_info.version + "<br>"
+        + "Copyright (c) " + program_info.year + " pivotiii<br>"
+        + license_html + "<br><br>"
+        + "compiled at " + program_info.compile_time;
 });
 
 async function removeCia(idx) {

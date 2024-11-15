@@ -13,6 +13,7 @@ class UI {
   private:
     Settings set;
     std::vector<Cia_File> cia_files;
+    std::string license;
 
     std::shared_ptr<saucer::application> app;
     saucer::smartview<saucer::serializers::glaze::serializer> smartview;
@@ -27,6 +28,7 @@ class UI {
     std::string fix_banners();
     void set_replace_files(const bool &replace);
     std::string check_requirements();
+    std::string get_program_info();
     void expose_functions();
 
   public:

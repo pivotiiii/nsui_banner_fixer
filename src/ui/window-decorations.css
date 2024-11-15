@@ -1,13 +1,8 @@
 html,
 body {
     height: 100vh;
-}
-
-html,
-body {
     overflow: hidden;
 }
-
 
 :root {
     --window-bar-close-button-hover-color: red;
@@ -199,6 +194,10 @@ body {
     margin-bottom: 3px;
 }
 
+#maxButton {
+    margin-bottom: 5px;
+}
+
 #closeButtonResizeTopContainer {
     width: 100%;
     height: var(--resize-bar-size);
@@ -312,6 +311,20 @@ div[data-webview-resize="bl"] {
     width: 16px;
     height: 16px;
     --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23000' fill-rule='evenodd' d='M9.8 4H6.2c-.577 0-.949 0-1.23.024c-.272.022-.372.06-.422.085a1 1 0 0 0-.437.437c-.025.05-.063.15-.085.422c-.023.283-.024.656-.024 1.23v3.6c0 .577 0 .949.024 1.23c.022.272.06.372.085.422c.096.188.249.341.437.437c.05.025.15.063.422.085c.283.023.656.024 1.23.024h3.6c.577 0 .949 0 1.23-.024c.272-.022.372-.06.422-.085c.188-.096.341-.249.437-.437c.025-.05.063-.15.085-.422c.023-.283.024-.656.024-1.23v-3.6c0-.577 0-.949-.024-1.23c-.022-.272-.06-.372-.085-.422a1 1 0 0 0-.437-.437c-.05-.025-.15-.063-.422-.085C10.747 4 10.374 4 9.8 4m-6.58.092c-.218.428-.218.988-.218 2.11v3.6c0 1.12 0 1.68.218 2.11c.192.376.498.682.874.874c.428.218.988.218 2.11.218h3.6c1.12 0 1.68 0 2.11-.218c.376-.192.682-.498.874-.874c.218-.428.218-.988.218-2.11v-3.6c0-1.12 0-1.68-.218-2.11a2 2 0 0 0-.874-.874C11.486 3 10.926 3 9.804 3h-3.6c-1.12 0-1.68 0-2.11.218a2 2 0 0 0-.874.874' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-color: currentColor;
+    -webkit-mask-image: var(--svg);
+    mask-image: var(--svg);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+}
+
+.qlementine-icons--info-16 {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23000' d='M8 7a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 7m0-1a1 1 0 1 0 0-2a1 1 0 0 0 0 2'/%3E%3Cpath fill='%23000' fill-rule='evenodd' d='M8 16c4.42 0 8-3.58 8-8s-3.58-8-8-8s-8 3.58-8 8s3.58 8 8 8m0-1c3.87 0 7-3.13 7-7s-3.13-7-7-7s-7 3.13-7 7s3.13 7 7 7' clip-rule='evenodd'/%3E%3C/svg%3E");
     background-color: currentColor;
     -webkit-mask-image: var(--svg);
     mask-image: var(--svg);

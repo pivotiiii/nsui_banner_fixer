@@ -16,6 +16,7 @@ if(BUILD_GUI)
     message("${npm_EXE}.cmd install @saucer-dev/cli")
     execute_process(
         COMMAND ${npm_EXE}.cmd install @saucer-dev/cli #Windows specific with the .cmd
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         OUTPUT_VARIABLE npm_OUTPUT
     )
     message(${npm_OUTPUT})
