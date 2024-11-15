@@ -32,13 +32,17 @@
 
         <div id="infoButtonContainer" class="window-bar-button-container window-edge-top">
             <div id="infoButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
-            <div id="infoButton" class="window-bar-button"><i class="qlementine-icons--info-16"></i></div>
+            <div id="infoButton" class="window-bar-button" style="margin-bottom: 4px;">
+                <i class="qlementine-icons--info-16"></i>
+            </div>
         </div>
 
         <div id="colorButtonContainer" class="window-bar-button-container window-edge-top">
             <div id="colorButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
-            <div id="colorButton" class="window-bar-button"><i class="icons10-sun visible-darkmode"></i><i
-                    class="icons10-moon visible-lightmode"></i></div>
+            <div id="colorButton" class="window-bar-button">
+                <i class="icons10-sun visible-darkmode"></i>
+                <i class="icons10-moon visible-lightmode"></i>
+            </div>
         </div>
 
         <div id="minButtonContainer" class="window-bar-button-container window-edge-top">
@@ -49,7 +53,8 @@
         <div id="maxButtonContainer" class="window-bar-button-container window-edge-top">
             <div id="maxButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
             <div id="maxButton" class="window-bar-button">
-                <i class="qlementine-icons--windows-maximize-16"></i>
+                <i id="maxIcon" class="qlementine-icons--windows-maximize-16"></i>
+                <i id="unmaxIcon" class="qlementine-icons--windows-unmaximize-16 hide-icon"></i>
             </div>
         </div>
 

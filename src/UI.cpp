@@ -86,7 +86,7 @@ void UI::expose_functions()
         this->smartview.set_maximized(true);
     });
 
-    this->smartview.expose("not_maximize", [&]() {
+    this->smartview.expose("unmaximize", [&]() {
         this->smartview.set_maximized(false);
     });
 

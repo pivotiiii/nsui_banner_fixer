@@ -194,6 +194,10 @@ body {
     margin-bottom: 3px;
 }
 
+.hide-icon {
+    display: none !important;
+}
+
 #maxButton {
     margin-bottom: 5px;
 }
