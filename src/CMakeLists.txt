@@ -5,10 +5,10 @@ if (BUILD_GUI)
                        )
 else()
         add_executable(nsui_banner_fixer
-        nsui_banner_fixer.hpp
-        nsui_banner_fixer.cpp 
-        ArgsParser.hpp 
-        ArgsParser.cpp 
+                       nsui_banner_fixer.hpp
+                       nsui_banner_fixer.cpp
+                       ArgsParser.hpp
+                       ArgsParser.cpp
                        )
 endif()
 
@@ -27,7 +27,7 @@ add_library(nsui_banner_fixer_game
 target_include_directories(nsui_banner_fixer_game INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(nsui_banner_fixer_game PRIVATE cxx_std_20)
 
-target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game TCLAP)
+target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game TCLAP pathfind)
 
 #----------------------------------------------------------------------------------------
 # UI

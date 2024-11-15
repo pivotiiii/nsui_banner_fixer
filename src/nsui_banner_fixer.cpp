@@ -6,7 +6,6 @@
 #include "Windows.h"
 #endif
 
-#include "ArgsParser.hpp"
 #include "Game.hpp"
 #include "Settings.hpp"
 #include "nsui_banner_fixer.hpp"
@@ -17,6 +16,7 @@
 #include "ArgsParser.hpp"
 #endif
 
+#include <pathfind.hpp>
 
 #ifndef VERSION
 #define VERSION "0.0.0"
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 #endif
 
     Settings set;
-    set.bin = argv[0];
+    set.bin = PathFind::FindExecutable();
     set.cwd = fs::current_path();
 
 #ifdef _WIN32

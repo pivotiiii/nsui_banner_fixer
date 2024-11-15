@@ -12,31 +12,31 @@ list(APPEND CMAKE_MODULE_PATH "${cmakehelpers_SOURCE_DIR}")
 #----------------------------------------------------------------------------------------
 
 if(BUILD_GUI)
-find_program(npm_EXE npm REQUIRED)
-message("${npm_EXE}.cmd install @saucer-dev/cli")
-execute_process(
-    COMMAND ${npm_EXE}.cmd install @saucer-dev/cli #Windows specific with the .cmd
-    OUTPUT_VARIABLE npm_OUTPUT
-)
-message(${npm_OUTPUT})
+    find_program(npm_EXE npm REQUIRED)
+    message("${npm_EXE}.cmd install @saucer-dev/cli")
+    execute_process(
+        COMMAND ${npm_EXE}.cmd install @saucer-dev/cli #Windows specific with the .cmd
+        OUTPUT_VARIABLE npm_OUTPUT
+    )
+    message(${npm_OUTPUT})
 
 
-FetchContent_Declare(
-    saucer 
-    GIT_REPOSITORY "https://github.com/saucer/saucer" 
-    GIT_TAG v4.2.0
-)
-FetchContent_MakeAvailable(saucer)
+    FetchContent_Declare(
+        saucer 
+        GIT_REPOSITORY "https://github.com/saucer/saucer" 
+        GIT_TAG v4.2.0
+    )
+    FetchContent_MakeAvailable(saucer)
 
 
-FetchContent_Declare(
-    tinyfiledialogs-download
-    GIT_REPOSITORY  https://git.code.sf.net/p/tinyfiledialogs/code tinyfiledialogs-code
-    GIT_TAG         29c1b354d75825209adf8cc1979c425885a64d32
-)
-FetchContent_MakeAvailable(tinyfiledialogs-download)
-add_library(tinyfiledialogs STATIC "${tinyfiledialogs-download_SOURCE_DIR}/tinyfiledialogs.c")
-target_include_directories(tinyfiledialogs PUBLIC "${tinyfiledialogs-download_SOURCE_DIR}")
+    FetchContent_Declare(
+        tinyfiledialogs-download
+        GIT_REPOSITORY  https://git.code.sf.net/p/tinyfiledialogs/code tinyfiledialogs-code
+        GIT_TAG         29c1b354d75825209adf8cc1979c425885a64d32
+    )
+    FetchContent_MakeAvailable(tinyfiledialogs-download)
+    add_library(tinyfiledialogs STATIC "${tinyfiledialogs-download_SOURCE_DIR}/tinyfiledialogs.c")
+    target_include_directories(tinyfiledialogs PUBLIC "${tinyfiledialogs-download_SOURCE_DIR}")
 endif()
 #----------------------------------------------------------------------------------------
 
@@ -48,6 +48,17 @@ FetchContent_Declare(
     UPDATE_DISCONNECTED 1
 )
 FetchContent_MakeAvailable(tclap)
+
+FetchContent_Declare(
+    pathfind-download
+    GIT_REPOSITORY      https://github.com/bkloppenborg/pathfind.git
+    GIT_TAG             1ce3b6f7d9a538a348eb3b93eba5927c737894f1 #
+    SOURCE_SUBDIR       PREVENTCMAKELISTTXT
+    UPDATE_DISCONNECTED 1
+)
+FetchContent_MakeAvailable(pathfind-download)
+add_library(pathfind STATIC "${pathfind-download_SOURCE_DIR}/src/pathfind.hpp" "${pathfind-download_SOURCE_DIR}/src/pathfind.cpp")
+target_include_directories(pathfind PUBLIC "${pathfind-download_SOURCE_DIR}/src")
 
 #----------------------------------------------------------------------------------------
 # Windows
