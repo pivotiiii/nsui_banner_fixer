@@ -1,5 +1,8 @@
 const getElements = ids => Object.assign({}, ...ids.map(id => ({ [id]: document.getElementById(id) })));
-const ui = getElements(["filesTableBody", "addBtn", "fixBtn", "tableContainer", "hr1", "hr2", "checkboxDiv", "checkboxReplace", "dangerBar", "successBar", "alertCloseButtonSuccess", "alertCloseButtonError"]);
+const ui = getElements([
+    "filesTableBody", "addBtn", "fixBtn", "tableContainer", "hr1", "hr2", "checkboxDiv", "checkboxReplace",
+    "dangerBar", "successBar", "alertCloseButtonSuccess", "alertCloseButtonError",
+    "missingReqsAlert", "missingReqsAlertCloseBtn", "missingReqsAlertText"]);
 
 ui.addBtn.addEventListener("click", async () => {
     ui.addBtn.classList.remove("app-btn-primary");
@@ -80,9 +83,19 @@ function buildTable(resultObj) {
             td2.innerHTML = `<button class="app-btn app-btn-subtle" onclick="removeCia(${i})"><i class="icons10-cross"></i></button>`
             if (showResults) {
                 if (results[i] === true) {
-                    td2.innerHTML = `<button class="app-btn app-btn-outline-success" style="pointer-events: none; border: none;"><i class="icons10-checkmark"></i></button>` + td2.innerHTML;
+                    td2.innerHTML =
+                        `<button class="app-btn app-btn-outline-success" `
+                        + `style="pointer-events: none; border: none;">`
+                        + `<i class="icons10-checkmark"></i>`
+                        + `</button>`
+                        + td2.innerHTML;
                 } else {
-                    td2.innerHTML = `<button class="app-btn app-btn-outline-danger" style="pointer-events: none;">Error<i class="icons10-exclamation-mark"></i></button>` + td2.innerHTML;
+                    td2.innerHTML =
+                        `<button class="app-btn app-btn-outline-danger" `
+                        + `style="pointer-events: none;">`
+                        + `Error<i class="icons10-exclamation-mark">`
+                        + `</i></button>`
+                        + td2.innerHTML;
                     numErrors = numErrors + 1;
                 }
             }

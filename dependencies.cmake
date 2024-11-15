@@ -11,6 +11,7 @@ list(APPEND CMAKE_MODULE_PATH "${cmakehelpers_SOURCE_DIR}")
 
 #----------------------------------------------------------------------------------------
 
+if(BUILD_GUI)
 find_program(npm_EXE npm REQUIRED)
 message("${npm_EXE}.cmd install @saucer-dev/cli")
 execute_process(
@@ -36,8 +37,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(tinyfiledialogs-download)
 add_library(tinyfiledialogs STATIC "${tinyfiledialogs-download_SOURCE_DIR}/tinyfiledialogs.c")
 target_include_directories(tinyfiledialogs PUBLIC "${tinyfiledialogs-download_SOURCE_DIR}")
-
-
+endif()
 #----------------------------------------------------------------------------------------
 
 FetchContent_Declare(

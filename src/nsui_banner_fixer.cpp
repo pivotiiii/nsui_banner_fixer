@@ -9,7 +9,14 @@
 #include "ArgsParser.hpp"
 #include "Game.hpp"
 #include "Settings.hpp"
+#include "nsui_banner_fixer.hpp"
+
+#ifdef GUI
 #include "UI.hpp"
+#else
+#include "ArgsParser.hpp"
+#endif
+
 
 #ifndef VERSION
 #define VERSION "0.0.0"
@@ -23,6 +30,7 @@
 
 namespace fs = std::filesystem;
 
+#if defined(_WIN32) && !defined(GUI)
 bool check_requirements(std::vector<fs::path> reqs)
 {
     uint8_t err_count = 0;
@@ -37,6 +45,7 @@ bool check_requirements(std::vector<fs::path> reqs)
     }
     return true;
 }
+#endif
 
 Cia_File fix_cia(const fs::path &path, const Settings &set)
 {
@@ -55,7 +64,7 @@ Cia_File fix_cia(const fs::path &path, const Settings &set)
     return res;
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(GUI)
 int WINAPI WinMain(HINSTANCE hInt, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
 {
     int argc = __argc;
@@ -64,6 +73,7 @@ int WINAPI WinMain(HINSTANCE hInt, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCm
 int main(int argc, char* argv[])
 {
 #endif
+
     Settings set;
     set.bin = argv[0];
     set.cwd = fs::current_path();
@@ -72,15 +82,18 @@ int main(int argc, char* argv[])
     set.dstool = set.bin.parent_path() / "tools" / "3dstool.exe";
     set.ctrtool = set.bin.parent_path() / "tools" / "ctrtool.exe";
     set.makerom = set.bin.parent_path() / "tools" / "makerom.exe";
+#ifndef GUI
     if (!check_requirements(std::vector<fs::path> {set.dstool, set.ctrtool, set.makerom})) {
         std::cerr << "ERROR: requirements are missing!\n";
         return 1;
     }
 #endif
+#endif
 
+#ifdef GUI
     UI a(set);
-    return 1;
-
+    return 0;
+#else
     std::vector<fs::path> cia_paths;
 
     int parse_args_return = parse_args(argc, argv, cia_paths, set);
@@ -106,4 +119,5 @@ int main(int argc, char* argv[])
 
     pause_if_double_clicked();
     return 0;
+#endif
 }

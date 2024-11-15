@@ -1,13 +1,18 @@
-add_executable(
-        nsui_banner_fixer WIN32 
+if (BUILD_GUI)
+        add_executable(nsui_banner_fixer WIN32
+                       nsui_banner_fixer.hpp
+                       nsui_banner_fixer.cpp
+                       )
+else()
+        add_executable(nsui_banner_fixer
         nsui_banner_fixer.hpp
         nsui_banner_fixer.cpp 
         ArgsParser.hpp 
         ArgsParser.cpp 
-        UI.hpp 
-        UI.cpp)
-target_compile_features(nsui_banner_fixer PRIVATE cxx_std_23)
-set_target_properties(nsui_banner_fixer PROPERTIES CXX_STANDARD 23 CXX_EXTENSIONS OFF CXX_STANDARD_REQUIRED ON)
+                       )
+endif()
+
+target_compile_features(nsui_banner_fixer PRIVATE cxx_std_20)
 
 target_compile_definitions(nsui_banner_fixer PRIVATE VERSION=\"${CMAKE_PROJECT_VERSION}\")
 string(TIMESTAMP year %Y UTC)
@@ -15,19 +20,51 @@ target_compile_definitions(nsui_banner_fixer PRIVATE YEAR="${year}")
 string(TIMESTAMP compile_time "%Y-%m-%d %H:%M:%S UTC" UTC)
 target_compile_definitions(nsui_banner_fixer PRIVATE COMPILE_TIME="${compile_time}")
 
-target_compile_definitions(nsui_banner_fixer PUBLIC -DB_PRODUCTION_MODE=ON)
-
 add_library(nsui_banner_fixer_game 
             Game.hpp 
             Game.cpp 
             Settings.hpp)
 target_include_directories(nsui_banner_fixer_game INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_features(nsui_banner_fixer_game PRIVATE cxx_std_23)
-set_target_properties(nsui_banner_fixer_game PROPERTIES CXX_STANDARD 23 CXX_EXTENSIONS OFF CXX_STANDARD_REQUIRED ON)
+target_compile_features(nsui_banner_fixer_game PRIVATE cxx_std_20)
 
-target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game TCLAP tinyfiledialogs saucer::saucer)
+target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game TCLAP)
 
-add_subdirectory(ui)
+#----------------------------------------------------------------------------------------
+# UI
+#----------------------------------------------------------------------------------------
+
+if (BUILD_GUI)
+        target_compile_definitions(nsui_banner_fixer PRIVATE GUI=1)
+
+        add_library(nsui_banner_fixer_ui 
+                    UI.hpp 
+                    UI.cpp 
+                    ${CMAKE_BINARY_DIR}/ui/embedded/all.hpp)
+
+        target_include_directories(nsui_banner_fixer_ui PRIVATE ${CMAKE_BINARY_DIR}/ui)
+        target_include_directories(nsui_banner_fixer_ui INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
+        target_compile_features(nsui_banner_fixer_ui PRIVATE cxx_std_23)
+        set_target_properties(nsui_banner_fixer_ui PROPERTIES CXX_STANDARD 23 CXX_EXTENSIONS OFF CXX_STANDARD_REQUIRED ON)
+
+        add_custom_command(
+            OUTPUT  ${CMAKE_BINARY_DIR}/ui/embedded/all.hpp
+            COMMAND npx.cmd saucer embed ${CMAKE_CURRENT_SOURCE_DIR}/ui ${CMAKE_BINARY_DIR}/ui/embedded >nul 2>&1 #windows only rn
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ui/index.html
+                    ${CMAKE_CURRENT_SOURCE_DIR}/ui/script.js
+                    ${CMAKE_CURRENT_SOURCE_DIR}/ui/style.css
+                    ${CMAKE_CURRENT_SOURCE_DIR}/ui/window-decorations.css
+                    ${CMAKE_CURRENT_SOURCE_DIR}/ui/window-decorations.js
+                    ${CMAKE_CURRENT_SOURCE_DIR}/ui/windows-ui-overwrites.css
+            COMMENT "Generating embedded files for GUI"
+        )
+
+        target_link_libraries(nsui_banner_fixer_ui PUBLIC saucer::saucer) #in UI.hpp
+        target_link_libraries(nsui_banner_fixer_ui PRIVATE nsui_banner_fixer_game tinyfiledialogs)
+
+        target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_ui)
+        set_property(TARGET nsui_banner_fixer PROPERTY VS_DPI_AWARE "PerMonitor")
+endif()
 
 #----------------------------------------------------------------------------------------
 # Windows
