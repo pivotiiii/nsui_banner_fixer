@@ -71,6 +71,10 @@ void UI::expose_functions()
         this->smartview.set_minimized(true);
     });
 
+    this->smartview.expose("check_requirements", [&]() -> std::string {
+        return this->check_requirements();
+    });
+
     this->smartview.expose("add_cias", [&]() -> std::string {
         return this->add_cias();
     });
@@ -136,74 +140,73 @@ std::string UI::build_path_json(bool show_results = false)
 
 std::string UI::add_cias()
 {
-        std::vector<const char*> file_terminators = {"*.cia"};
-        const char* output = tinyfd_openFileDialog(
-            "Select .cia files to fix.",
-            "",
-            file_terminators.size(),
-            file_terminators.data(),
-            ".cia files",
-            1);
-        if (output != NULL) {
-            std::string selected_files(output);
-            // std::replace(selected_files.begin(), selected_files.end(), '\\', '/');
-            std::vector<fs::path> selected_file_paths = split_into_paths(selected_files, '|');
-            for (const auto &path : selected_file_paths) {
-                add_path(path);
-            }
+    std::vector<const char*> file_terminators = {"*.cia"};
+    const char* output = tinyfd_openFileDialog(
+        "Select .cia files to fix.",
+        "",
+        file_terminators.size(),
+        file_terminators.data(),
+        ".cia files",
+        1);
+    if (output != NULL) {
+        std::string selected_files(output);
+        // std::replace(selected_files.begin(), selected_files.end(), '\\', '/');
+        std::vector<fs::path> selected_file_paths = split_into_paths(selected_files, '|');
+        for (const auto &path : selected_file_paths) {
+            add_path(path);
         }
-        return build_path_json();
+    }
+    return build_path_json();
 }
 
 std::string UI::remove_cia(const int &req)
 {
-        remove_path(req);
-        return build_path_json();
+    remove_path(req);
+    return build_path_json();
 }
 
 void UI::set_replace_files(const bool &replace)
 {
-        this->set.replace = replace;
+    this->set.replace = replace;
 }
 
 std::string UI::fix_banners()
 {
-        std::vector<Cia_File> results;
+    std::vector<Cia_File> results;
 
-        for (const Cia_File &file : this->cia_files) {
-            auto result = fix_cia(file.path, this->set);
+    for (const Cia_File &file : this->cia_files) {
+        auto result = fix_cia(file.path, this->set);
 
-            if (result.result == false && !containsOnlyASCII(result.path.string())) {
-                result.message = "ASCII Error";
-            } else if (result.result == false) {
-                result.message = "not v28 Error";
-            }
-
-            results.push_back(result);
-        }
-        this->cia_files = results;
-
-        for (const auto &res : results) {
-            this->smartview.execute("console.log(\"wowza\")");
-            this->smartview.execute("console.log(" + res.message + ")");
+        if (result.result == false && !containsOnlyASCII(result.path.string())) {
+            result.message = "ASCII Error";
+        } else if (result.result == false) {
+            result.message = "not v28 Error";
         }
 
-        return build_path_json(true);
+        results.push_back(result);
+    }
+    this->cia_files = results;
 
-        // add error messages
+    for (const auto &res : results) {
+        this->smartview.execute("console.log(\"wowza\")");
+        this->smartview.execute("console.log(" + res.message + ")");
+    }
 
-        std::string files, result_bools_string, messages;
-        for (const auto &result : results) {
-            files = files + "\"" + result.path.filename().string() + "\"" + ",";
-            result_bools_string = result_bools_string + (result.result ? "true" : "false") + ",";
-            messages = messages + "\"" + result.message + "\"" + ",";
+    return build_path_json(true);
+}
+
+std::string UI::check_requirements()
+{
+    std::vector<fs::path> reqs {set.dstool, set.ctrtool, set.makerom};
+    uint8_t err_count = 0;
+    std::string missing_files;
+    for (const fs::path &path : reqs) {
+        if (!fs::exists(path)) {
+            missing_files = missing_files + "\"" + path.filename().string() + "\",";
+            err_count = err_count + 1;
         }
-        files = files.substr(0, files.size() - 1);
-        result_bools_string = result_bools_string.substr(0, result_bools_string.size() - 1);
-        messages = messages.substr(0, messages.size() - 1);
-
-        std::string retVal = std::format("{{\"files\": [{}], \"results\": [{}], \"messages\": [{}]}}", files, result_bools_string, messages);
-
-        return retVal;
-
+    }
+    missing_files = missing_files.substr(0, missing_files.size() - 1);
+    std::string retVal = std::format("{{\"result\": {}, \"err_count\": {}, \"missing_files\": [{}]}}", (err_count == 0 ? "true" : "false"), err_count, missing_files);
+    return retVal;
 }

@@ -31,3 +31,22 @@
     flex-direction: row;
     justify-content: left;
 }
+
+.app-alert .app-alert-modal {
+    width: 55% !important;
+    max-width: 420px !important;
+    min-width: 360px !important;
+    top: unset !important;
+    border-radius: 7px !important;
+    bottom: unset !important;
+    left: unset !important;
+}
+
+br.smaller {
+    /* makes it have a width */
+    display: block;
+    /* clears default height */
+    content: "";
+    /* change this to whatever height you want it */
+    margin-top: 5px;
+}

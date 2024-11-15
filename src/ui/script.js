@@ -58,6 +58,14 @@ ui.alertCloseButtonError.addEventListener("click", async () => {
     ui.dangerBar.classList.remove("app-alert-bar-active");
 })
 
+ui.missingReqsAlertCloseBtn.addEventListener("click", async () => {
+    ui.missingReqsAlert.classList.remove("show");
+})
+
+window.addEventListener("load", async () => {
+    await checkRequirements();
+});
+
 async function removeCia(idx) {
     let valuesString = await saucer.exposed.remove_cia(idx);
     let values = await JSON.parse(valuesString);
@@ -138,5 +146,34 @@ function showAlert(numErrors) {
             ui.dangerBar.children[2].innerHTML = "There have been " + numErrors + " errors.";
         }
 
+    }
+}
+
+async function checkRequirements(repeat = false) {
+    let resultsString = await saucer.exposed.check_requirements();
+    let results = JSON.parse(resultsString);
+    console.log(results);
+    if (repeat === true && results.result === false) {
+        setTimeout(() => {
+            checkRequirements(true);
+        }, 3000);
+    }
+    else if (repeat === true && results.result === true) {
+        ui.addBtn.disabled = false;
+        ui.addBtn.classList.add("app-btn-primary");
+    }
+    else if (results.result === false) {
+        ui.missingReqsAlert.classList.add("show");
+        var missing_files_string = results.missing_files.join("<br>");
+        ui.missingReqsAlertText.innerHTML =
+            "Missing required files!<br><br class=\"smaller\">"
+            + missing_files_string
+            + "<br><br class=\"smaller\">"
+            + "Please extract the 'tools' folder that was included in the downloaded .zip file and place it next to nsui_banner_fixer.exe.";
+        ui.addBtn.disabled = true;
+        ui.addBtn.classList.remove("app-btn-primary");
+        setTimeout(() => {
+            checkRequirements(true);
+        }, 3000);
     }
 }

@@ -26,6 +26,7 @@ class UI {
     std::string remove_cia(const int &req);
     std::string fix_banners();
     void set_replace_files(const bool &replace);
+    std::string check_requirements();
     void expose_functions();
 
   public:
