@@ -1,6 +1,6 @@
 html,
 body {
-    height: calc(100vh - var(--window-bar-height));
+    height: 100vh;
 }
 
 html,
@@ -19,7 +19,7 @@ body {
     --window-bar-height: 32px;
     --resize-bar-size: 5px;
     --resize-corner-size: 16px;
-    --border-color: var(--dark, #333333) var(--light, #666666);
+    --border-color: var(--dark, #333333) var(--light, #8a8a8a);
 }
 
 .visible-darkmode {

@@ -17,31 +17,31 @@
 <body>
 
     <div id="windowBarContainer" class="window-bar">
-        <div id="windowBarLeftResizeContainer">
-            <div id="windowBarLeftCornerResize" data-webview-resize="tl"></div>
+        <div id="windowBarLeftResizeContainer" class="window-edge-left">
+            <div id="windowBarLeftCornerResize" class="window-edge-top" data-webview-resize="tl"></div>
             <div id="windowBarLeftResize" data-webview-resize="l"></div>
         </div>
 
         <div id="windowBarCenterContainer">
-            <div id="windowBarCenterResizeContainer">
+            <div id="windowBarCenterResizeContainer" class="window-edge-top">
                 <div id="windowBarCenterLeftResize" data-webview-resize="tl"></div>
                 <div id="windowBarCenterTopResize" data-webview-resize="t"></div>
             </div>
             <div id="windowBarCenter" data-webview-drag></div>
         </div>
 
-        <div id="colorButtonContainer" class="window-bar-button-container">
+        <div id="colorButtonContainer" class="window-bar-button-container window-edge-top">
             <div id="colorButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
             <div id="colorButton" class="window-bar-button"><i class="icons10-sun visible-darkmode"></i><i
                     class="icons10-moon visible-lightmode"></i></div>
         </div>
 
-        <div id="minButtonContainer" class="window-bar-button-container">
+        <div id="minButtonContainer" class="window-bar-button-container window-edge-top">
             <div id="minButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
             <div id="minButton" class="window-bar-button"><i class="icons10-minus"></i></div>
         </div>
 
-        <div id="maxButtonContainer" class="window-bar-button-container">
+        <div id="maxButtonContainer" class="window-bar-button-container window-edge-top">
             <div id="maxButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
             <div id="maxButton" class="window-bar-button">
                 <i class="qlementine-icons--windows-maximize-16"></i>
@@ -49,14 +49,14 @@
         </div>
 
         <div id="closeButtonContainer" class="window-bar-button-container">
-            <div id="closeButtonResizeTopContainer" class="window-bar-button-resize">
+            <div id="closeButtonResizeTopContainer" class="window-bar-button-resize window-edge-top">
                 <div id="closeButtonResizeTop" data-webview-resize="t"></div>
-                <div id="closeButtonResizeTopCorner" data-webview-resize="tr">
+                <div id="closeButtonResizeTopCorner" class="window-edge-right" data-webview-resize="tr">
                 </div>
             </div>
             <div id="closeButtonContainer2">
                 <div id="closeButton" class="window-bar-button"><i class="icons10-cross"></i></div>
-                <div id="closeButtonResizeRightContainer">
+                <div id="closeButtonResizeRightContainer" class="window-edge-right">
                     <div id="closeButtonResizeRightCorner" data-webview-resize="tr">
                     </div>
                     <div id="closeButtonResizeRight" data-webview-resize="r">
@@ -68,7 +68,7 @@
 
     <div id="window">
 
-        <div id="resizeBarLeft" class="resize-bar-ver">
+        <div id="resizeBarLeft" class="resize-bar-ver window-edge-left">
             <div id="resizeLeft" class="resize-bar-ver-center" data-webview-resize="l">
             </div>
             <div id="resizeLeftBottom" class="resize-bar-ver-corner" data-webview-resize="bl">
@@ -126,13 +126,13 @@
             </div>
         </div>
 
-        <div id="resizeBarRight" class="resize-bar-ver">
+        <div id="resizeBarRight" class="resize-bar-ver window-edge-right">
             <div id="resizeRight" class="resize-bar-ver-center" data-webview-resize="r"></div>
             <div id="resizeRightBottom" class="resize-bar-ver-corner" data-webview-resize="br"></div>
         </div>
     </div>
 
-    <div id="resizeBarBottom" class="resize-bar-hor resize-bar-hor-bottom">
+    <div id="resizeBarBottom" class="resize-bar-hor resize-bar-hor-bottom window-edge-bottom">
         <div id="resizeBottomLeft" class="resize-bar-hor-corner" data-webview-resize="bl"></div>
         <div id="resizeBottom" class="resize-bar-hor-center" data-webview-resize="b"></div>
         <div id="resizeBottomRight" class="resize-bar-hor-corner" data-webview-resize="br"></div>
