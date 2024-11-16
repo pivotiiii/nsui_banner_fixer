@@ -173,7 +173,7 @@ std::string UI::add_cias()
         "",
         file_terminators.size(),
         file_terminators.data(),
-        ".cia files",
+        "*.cia",
         1);
     if (output != NULL) {
         std::string selected_files(output);
@@ -184,6 +184,18 @@ std::string UI::add_cias()
         }
     }
     return build_path_json();
+}
+
+bool UI::select_save_location()
+{
+    const char* output = tinyfd_selectFolderDialog(
+        "Select folder to save fixed files to.",
+        this->set.out.string().c_str());
+    if (output == NULL) {
+        return false;
+    }
+    this->set.out = output;
+    return true;
 }
 
 std::string UI::remove_cia(const int &req)
@@ -199,8 +211,11 @@ void UI::set_replace_files(const bool &replace)
 
 std::string UI::fix_banners()
 {
-    std::vector<Cia_File> results;
+    if (!this->set.replace && !select_save_location()) {
+        return build_path_json(false);
+    }
 
+    std::vector<Cia_File> results;
     for (const Cia_File &file : this->cia_files) {
         auto result = fix_cia(file.path, this->set);
 

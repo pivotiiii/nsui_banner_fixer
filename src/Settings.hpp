@@ -6,6 +6,7 @@
 typedef struct Settings {
     std::filesystem::path bin;
     std::filesystem::path cwd;
+    std::filesystem::path out;
     std::filesystem::path dstool;
     std::filesystem::path ctrtool;
     std::filesystem::path makerom;

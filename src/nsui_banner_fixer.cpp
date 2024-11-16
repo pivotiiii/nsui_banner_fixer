@@ -77,6 +77,7 @@ int main(int argc, char* argv[])
     Settings set;
     set.bin = PathFind::FindExecutable();
     set.cwd = fs::current_path();
+    set.out = fs::current_path() / "out";
 
 #ifdef _WIN32
     set.dstool = set.bin.parent_path() / "tools" / "3dstool.exe";

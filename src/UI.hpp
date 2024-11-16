@@ -29,6 +29,7 @@ class UI {
     void set_replace_files(const bool &replace);
     std::string check_requirements();
     std::string get_program_info();
+    bool select_save_location();
     void expose_functions();
 
   public:

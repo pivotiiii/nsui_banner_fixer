@@ -283,9 +283,8 @@ bool Game::repack_cia()
     if (set.replace) {
         out_cia = this->cia_path;
     } else {
-        fs::path out_dir = this->cwd.parent_path().parent_path() / "out";
-        fs::create_directories(out_dir);
-        out_cia = out_dir / (this->name + ".cia");
+        fs::create_directories(this->set.out);
+        out_cia = this->set.out / (this->name + ".cia");
     }
     fs::path content_path_rel = fs::relative(this->cwd / (this->name + ".cxi"), fs::current_path()); // may need checking if file on different drive
 
