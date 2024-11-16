@@ -1,11 +1,9 @@
 if (BUILD_GUI)
         add_executable(nsui_banner_fixer WIN32
-                       nsui_banner_fixer.hpp
                        nsui_banner_fixer.cpp
                        )
 else()
         add_executable(nsui_banner_fixer
-                       nsui_banner_fixer.hpp
                        nsui_banner_fixer.cpp
                        ArgsParser.hpp
                        ArgsParser.cpp

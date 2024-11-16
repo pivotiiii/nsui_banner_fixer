@@ -10,11 +10,37 @@ typedef struct versionS {
     int micro = 0;
 } versionS;
 
+typedef struct Fix_Banner_Result {
+    std::filesystem::path path;
+    bool result;
+    std::string message;
+
+    Fix_Banner_Result() {};
+    Fix_Banner_Result(std::filesystem::path _path, bool _result, std::string _message = "")
+        : path(_path),
+          result(_result),
+          message(_message) {
+          };
+} Fix_Banner_Result;
+
+typedef struct Proc_Result {
+    bool result;
+    std::string message;
+
+    Proc_Result() {};
+    Proc_Result(bool _result, std::string _message = "")
+        : result(_result),
+          message(_message) {
+          };
+} Proc_Result;
+
+Fix_Banner_Result fix_cia(const std::filesystem::path &path, const Settings &set);
+
 class Game {
   public:
     Game(const std::filesystem::path &cia, const Settings &set);
     ~Game();
-    bool fix_banner();
+    Fix_Banner_Result fix_banner();
 
   private:
     Settings set;
@@ -25,9 +51,9 @@ class Game {
     versionS version;
 
     versionS get_version();
-    bool extract_cia();
-    bool edit_bcmdl();
-    bool repack_cia();
+    Proc_Result extract_cia();
+    Proc_Result edit_bcmdl();
+    Proc_Result repack_cia();
 };
 
 #endif

@@ -11,21 +11,6 @@
 
 namespace fs = std::filesystem;
 
-void pause_if_double_clicked(bool require_key_press, int sleep)
-{
-#ifdef _WIN32
-    DWORD procIDs[2];
-    DWORD maxCount = 2;
-    DWORD result = GetConsoleProcessList((LPDWORD) procIDs, maxCount);
-    if (result == 1) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
-        if (require_key_press) {
-            system("pause");
-        }
-    }
-#endif
-}
-
 bool get_cia_files(std::string ciaArg, std::vector<fs::path> &cias)
 {
     if (ciaArg != "") {

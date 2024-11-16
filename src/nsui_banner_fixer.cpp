@@ -8,7 +8,6 @@
 
 #include "Game.hpp"
 #include "Settings.hpp"
-#include "nsui_banner_fixer.hpp"
 
 #ifdef GUI
 #include "UI.hpp"
@@ -45,24 +44,20 @@ bool check_requirements(std::vector<fs::path> reqs)
     }
     return true;
 }
-#endif
 
-Cia_File fix_cia(const fs::path &path, const Settings &set)
+void pause_if_double_clicked(bool require_key_press, int sleep)
 {
-    Cia_File res = {path, false, ""};
-    try {
-        res.result = Game(path, set).fix_banner();
-    } catch (const std::system_error &e) { // this happens if e.g. the console is set to russian codepage and the cia path contains an accent somewhere
-        res.message = e.what();
-        res.message.append("\nSometimes this happens if your OS is set to a language other than English and the cia path contains accents or other special characters "
-                           "(Both the full path to the folder the .cia file is in as well as the file itself). "
-                           "If this is the case, please try renaming and moving the .cia file to a location without these characters, e.g. \"C:/\" and running again there.");
-        res.path = fs::relative(fs::current_path() / "path" / "with" / "problems");
-        res.result = false;
+    DWORD procIDs[2];
+    DWORD maxCount = 2;
+    DWORD result = GetConsoleProcessList((LPDWORD) procIDs, maxCount);
+    if (result == 1) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
+        if (require_key_press) {
+            system("pause");
+        }
     }
-
-    return res;
 }
+#endif
 
 #if defined(_WIN32) && defined(GUI)
 int WINAPI WinMain(HINSTANCE hInt, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
@@ -106,7 +101,7 @@ int main(int argc, char* argv[])
             return 0;
     }
 
-    std::vector<Cia_File> results;
+    std::vector<Fix_Banner_Result> results;
     for (const auto &path : cia_paths) {
         results.push_back(fix_cia(path, set));
     }
@@ -117,8 +112,9 @@ int main(int argc, char* argv[])
                       << res.message;
         }
     }
-
+#ifdef _WIN32
     pause_if_double_clicked();
+#endif
     return 0;
 #endif
 }

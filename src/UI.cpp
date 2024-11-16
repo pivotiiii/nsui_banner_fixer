@@ -121,14 +121,14 @@ void UI::expose_functions()
 
 void UI::add_path(const fs::path &path)
 {
-    if (!std::any_of(cia_files.begin(), cia_files.end(), [&path](const Cia_File &item) { return item.path == path; })) {
-        cia_files.push_back(Cia_File(path, false));
+    if (!std::any_of(cia_files.begin(), cia_files.end(), [&path](const Fix_Banner_Result &item) { return item.path == path; })) {
+        cia_files.push_back(Fix_Banner_Result(path, false, "hide_result"));
     }
 }
 
 void UI::remove_path(const fs::path &path)
 {
-    std::erase_if(cia_files, [&path](const Cia_File &item) { return item.path == path; });
+    std::erase_if(cia_files, [&path](const Fix_Banner_Result &item) { return item.path == path; });
 }
 
 void UI::remove_path(const unsigned int &index)
@@ -215,8 +215,8 @@ std::string UI::fix_banners()
         return build_path_json(false);
     }
 
-    std::vector<Cia_File> results;
-    for (const Cia_File &file : this->cia_files) {
+    std::vector<Fix_Banner_Result> results;
+    for (const Fix_Banner_Result &file : this->cia_files) {
         auto result = fix_cia(file.path, this->set);
 
         if (result.result == false && !containsOnlyASCII(result.path.string())) {

@@ -13,31 +13,32 @@
 
 namespace bp = boost::process;
 
-#define run_process(exec, arg_list, verbose_offset, ret_code, err_msg)    \
-    {                                                                     \
-        if (set.verbose) {                                                \
-            arg_list.insert(arg_list.begin() + verbose_offset, "-v");     \
-        }                                                                 \
-        bp::ipstream output_stream;                                       \
-        std::string line;                                                 \
-        int retval = bp::system(bp::exe = exec,                           \
-                                bp::args = arg_list,                      \
-                                bp::std_out > output_stream,              \
-                                ::boost::process::windows::hide);         \
-                                                                          \
-        if (retval != ret_code) {                                         \
-            while (std::getline(output_stream, line)) {                   \
-                std::cerr << line << "\n";                                \
-            }                                                             \
-            std::cerr << "ERROR: " << err_msg << " (" << retval << ")\n"; \
-            return false;                                                 \
-        }                                                                 \
-                                                                          \
-        if (set.verbose) {                                                \
-            while (std::getline(output_stream, line)) {                   \
-                std::cout << line << "\n";                                \
-            }                                                             \
-        }                                                                 \
+#define run_process(exec, arg_list, verbose_offset, ret_code, err_msg)                      \
+    {                                                                                       \
+        if (set.verbose) {                                                                  \
+            arg_list.insert(arg_list.begin() + verbose_offset, "-v");                       \
+        }                                                                                   \
+        bp::ipstream output_stream;                                                         \
+        std::string line;                                                                   \
+        int retval = bp::system(bp::exe = exec,                                             \
+                                bp::args = arg_list,                                        \
+                                bp::std_out > output_stream,                                \
+                                ::boost::process::windows::hide);                           \
+                                                                                            \
+        if (retval != ret_code) {                                                           \
+            while (std::getline(output_stream, line)) {                                     \
+                std::cerr << line << "\n";                                                  \
+            }                                                                               \
+            std::string err = "";                                                           \
+            err = "ERROR: " + std::string(err_msg) + " (" + std::to_string(retval) + ")\n"; \
+            return Proc_Result(false, err_msg);                                             \
+        }                                                                                   \
+                                                                                            \
+        if (set.verbose) {                                                                  \
+            while (std::getline(output_stream, line)) {                                     \
+                std::cout << line << "\n";                                                  \
+            }                                                                               \
+        }                                                                                   \
     }
 #elif defined(__linux__)
 
@@ -63,6 +64,23 @@ const std::vector<std::string> locale_codes = {
     "USA_FR",
     "USA_SP",
     "USA_PO"};
+
+Fix_Banner_Result fix_cia(const fs::path &path, const Settings &set)
+{
+    Fix_Banner_Result res;
+    try {
+        res = Game(path, set).fix_banner();
+    } catch (const std::system_error &e) { // this happens if e.g. the console is set to russian codepage and the cia path contains an accent somewhere
+        res.message = e.what();
+        res.message.append("\nSometimes this happens if your OS is set to a language other than English and the cia path contains accents or other special characters "
+                           "(Both the full path to the folder the .cia file is in as well as the file itself). "
+                           "If this is the case, please try renaming and moving the .cia file to a location without these characters, e.g. \"C:/\" and running again there.");
+        res.path = fs::relative(fs::current_path() / "path" / "with" / "problems");
+        res.result = false;
+    }
+
+    return res;
+}
 
 Game::Game(const fs::path &cia, const Settings &set)
     : cia_path(cia),
@@ -122,7 +140,7 @@ versionS Game::get_version()
     return version;
 }
 
-bool Game::extract_cia()
+Proc_Result Game::extract_cia()
 {
 #if defined(_WIN32)
 
@@ -154,70 +172,79 @@ bool Game::extract_cia()
                                                "--banner-dir", (this->cwd / "banner").string()};
     run_process(set.dstool.string(), extract_banner, 1, 0, "Failed to extract banner from exefs");
 
-    return true;
+    return Proc_Result(true);
 
 #elif defined(__linux__)
 
     Tool::CTR ctr(cia_path, cwd, set);
     if (!ctr.extract_cia_contents()) {
         std::cerr << "ERROR: Failed to extract contents from .CIA\n";
-        return false;
+        return Proc_Result(false, "ERROR: Failed to extract contents from .CIA");
     }
 
     Tool::DS ds(name, cwd, set);
     if (!ds.split_contents()) {
         std::cerr << "ERROR: Failed to split contents\n";
-        return false;
+        return Proc_Result(false, "ERROR: Failed to split contents");
     }
 
     if (!ds.extract_exefs()) {
         std::cerr << "ERROR: Failed to extract exefs from contents\n";
-        return false;
+        return Proc_Result(false, "ERROR: Failed to extract exefs from contents");
     }
 
     if (!ds.extract_banner()) {
         std::cerr << "ERROR: Failed to extract banner from exefs\n";
-        return false;
+        return Proc_Result(false, "ERROR: Failed to extract banner from exefs");
     }
 
-    return true;
+    return Proc_Result(true);
 
 #endif
 }
 
-bool Game::fix_banner()
+Fix_Banner_Result Game::fix_banner()
 {
+    Proc_Result pr;
+
     if (!set.quiet) {
         std::cout << "--- " << this->cia_path.string() << "\n--- extracting cia\n";
     }
-    if (!this->extract_cia()) {
-        std::cerr << "ERROR: Failed to extract CIA\n";
-        return false;
+    pr = this->extract_cia();
+    if (!pr.result) {
+        pr.message = "ERROR: Failed to extract CIA\n" + pr.message;
+        std::cerr << pr.message;
+        return Fix_Banner_Result(this->cia_path, false, pr.message);
     }
 
     if (!set.quiet) {
         std::cout << "--- editing banner\n";
     }
-    if (!this->edit_bcmdl()) {
-        std::cerr << "ERROR: Failed to edit banner files\n";
-        return false;
+    pr = this->edit_bcmdl();
+    if (!pr.result) {
+        pr.message = "ERROR: Failed to edit banner files\n" + pr.message;
+        std::cerr << pr.message;
+        return Fix_Banner_Result(this->cia_path, false, pr.message);
     }
 
     if (!set.quiet) {
         std::cout << "--- repacking cia\n";
     }
-    if (!this->repack_cia()) {
-        std::cerr << "ERROR: Failed to repack CIA\n";
-        return false;
+    pr = this->repack_cia();
+    if (!pr.result) {
+        pr.message = "ERROR: Failed to repack CIA\n" + pr.message;
+        std::cerr << pr.message;
+        return Fix_Banner_Result(this->cia_path, false, pr.message);
     }
 
     if (!set.quiet) {
         std::cout << "--- done\n";
     }
-    return true;
+    return Fix_Banner_Result(this->cia_path, true);
+    ;
 }
 
-bool Game::edit_bcmdl()
+Proc_Result Game::edit_bcmdl()
 {
     for (int i = 1; i < 14; i++) {
         std::fstream file;
@@ -234,9 +261,11 @@ bool Game::edit_bcmdl()
                     std::cout << "Locale code at 0x" << std::hex << offset << std::dec << ": " << rbuf;
                 }
                 if (strncmp(rbuf, "USA_EN", 6) != 0 && strncmp(rbuf, locale_codes[i - 1].c_str(), 6) != 0) {
-                    std::cerr << "ERROR: banner" << i << ".bcmdl no locale code at offset " << std::hex << offset << std::dec
-                              << ", data is \"" << std::string_view {rbuf, 6} << "\"\n";
-                    return false;
+                    std::stringstream s;
+                    s << "ERROR: banner" << i << ".bcmdl no locale code at offset " << std::hex << offset << std::dec
+                      << ", data is \"" << std::string_view {rbuf, 6} << "\"\n";
+                    std::cerr << s.str();
+                    return Proc_Result(false, s.str());
                 }
 
                 file.seekp(offset, std::fstream::beg);
@@ -248,15 +277,16 @@ bool Game::edit_bcmdl()
                 }
             }
         } else {
-            std::cerr << "ERROR: Failed to open banner" << i << ".bcmdl\n";
-            return false;
+            std::string err_msg = "ERROR: Failed to open banner" + std::to_string(i) + ".bcmdl";
+            std::cerr << err_msg << "\n";
+            return Proc_Result(false, err_msg);
         }
         file.close();
     }
-    return true;
+    return Proc_Result(true);
 }
 
-bool Game::repack_cia()
+Proc_Result Game::repack_cia()
 {
 #if defined(_WIN32)
     fs::remove(this->cwd / "exefs" / (std::string("banner.") + this->banner_ext));
@@ -296,7 +326,7 @@ bool Game::repack_cia()
                                             "-micro", std::to_string(this->version.micro)};
     run_process(set.makerom.string(), rebuild_cia, 0, 0, "Failed to rebuild CIA");
 
-    return true;
+    return Proc_Result(true);
 
 #elif defined(__linux__)
 
@@ -304,36 +334,35 @@ bool Game::repack_cia()
 
     if (!ds.rebuild_banner()) {
         std::cerr << "ERROR: Failed to rebuild banner\n";
-        return false;
+        return Proc_Result(false, "ERROR: Failed to rebuild banner");
     }
 
     if (!ds.rebuild_exefs()) {
         std::cerr << "ERROR: Failed to rebuild exefs\n";
-        return false;
+        return Proc_Result(false, "ERROR: Failed to rebuild exefs");
     }
 
     if (!ds.rebuild_cxi()) {
         std::cerr << "ERROR: Failed to rebuild cxi\n";
-        return false;
+        return Proc_Result(false, "ERROR: Failed to rebuild cxi");
     }
 
     fs::path out_cia;
     if (set.replace) {
-        out_cia = cia_path;
+        out_cia = this->cia_path;
     } else {
-        fs::path out_dir = cwd.parent_path().parent_path() / "out";
-        fs::create_directories(out_dir);
-        out_cia = out_dir / (name + ".cia");
+        fs::create_directories(this->set.out);
+        out_cia = this->set.out / (this->name + ".cia");
     }
 
     Tool::MakeRom mr(name, out_cia, version, set);
 
     if (!mr.rebuild_cia()) {
         std::cerr << "ERROR: Failed to rebuild CIA\n";
-        return false;
+        return Proc_Result(false, "ERROR: Failed to rebuild CIA");
     }
 
-    return true;
+    return Proc_Result(true);
 
 #endif
 }

@@ -6,13 +6,13 @@
 
 #include <saucer/smartview.hpp>
 
+#include "Game.hpp"
 #include "Settings.hpp"
-#include "nsui_banner_fixer.hpp"
 
 class UI {
   private:
     Settings set;
-    std::vector<Cia_File> cia_files;
+    std::vector<Fix_Banner_Result> cia_files;
     std::string license;
 
     std::shared_ptr<saucer::application> app;
