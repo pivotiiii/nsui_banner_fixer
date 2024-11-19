@@ -18,6 +18,10 @@
   background-color: rgba(46, 24, 26, 1);
 }
 
+.unselectable {
+  user-select: none;
+}
+
 #buttonsDiv {
   padding-top: 5px;
   padding-bottom: 50px;
