@@ -60,6 +60,10 @@ br.smaller {
   max-height: 80%;
   max-width: 700px !important;
   width: 80% !important;
+  top: unset;
+  bottom: unset;
+  left: unset !important;
+  border-radius: 7px;
 }
 
 #infoAlertText {
@@ -77,4 +81,8 @@ br.smaller {
   position: absolute;
   bottom: 0px;
   width: 100%;
+}
+
+.app-alert.app-dialog {
+  backdrop-filter: blur(1px);
 }

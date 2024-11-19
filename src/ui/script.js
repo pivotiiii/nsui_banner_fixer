@@ -121,9 +121,9 @@ function buildTable(resultObj) {
                 } else {
                     td2.innerHTML =
                         `<button class="app-btn app-btn-outline-danger" `
-                        + `style="pointer-events: none;">`
-                        + `Error<i class="icons10-exclamation-mark">`
-                        + `</i></button>`
+                        // + `style="pointer-events: none;">`
+                        + `onclick="showFileError('${messages[i]}')">`
+                        + `Error<i class="icons10-exclamation-mark"></i></button>`
                         + td2.innerHTML;
                     numErrors = numErrors + 1;
                 }
@@ -149,6 +149,11 @@ function buildTable(resultObj) {
 
 }
 
+function showFileError(message) {
+    message = message.replaceAll("ERROR: ", "");
+    ui.missingReqsAlertText.innerHTML = message;
+    ui.missingReqsAlert.classList.add("show");
+}
 
 function showAlert(numErrors) {
     if (numErrors === 0) {
@@ -184,8 +189,7 @@ async function checkRequirements(repeat = false) {
         ui.addBtn.classList.add("app-btn-primary");
     }
     else if (results.result === false) {
-        ui.missingReqsAlert.classList.add("show");
-        var missing_files_string = results.missing_files.join("<br>");
+        let missing_files_string = results.missing_files.join("<br>");
         ui.missingReqsAlertText.innerHTML =
             "Missing required files!<br><br class=\"smaller\">"
             + missing_files_string
@@ -193,6 +197,7 @@ async function checkRequirements(repeat = false) {
             + "Please extract the 'tools' folder that was included in the downloaded .zip file and place it next to nsui_banner_fixer.exe.";
         ui.addBtn.disabled = true;
         ui.addBtn.classList.remove("app-btn-primary");
+        ui.missingReqsAlert.classList.add("show");
         setTimeout(() => {
             checkRequirements(true);
         }, 3000);

@@ -229,10 +229,9 @@ std::string UI::fix_banners()
         auto result = fix_cia(file.path, this->set);
 
         if (result.result == false && !containsOnlyASCII(result.path.string())) {
-            result.message = "ASCII Error";
-        } else if (result.result == false) {
-            result.message = "not v28 Error";
+            result.message = result.message + "\nPlease try moving the .cia file as well as this program to a folder that only contains ASCII characters (e.g. C:/nsui, no accents, japanese, cyrillic etc.) and removing any non ASCII charaters from the .cia file name.";
         }
+        result.message = make_string_json_fit(result.message);
 
         results.push_back(result);
     }
