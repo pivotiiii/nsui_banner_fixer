@@ -40,6 +40,15 @@ std::string replace_char_with_string(const std::string &str, char replaced, cons
     return result;
 }
 
+std::string make_string_json_fit(const std::string &str)
+{
+    std::string ret = str;
+    ret = replace_char_with_string(ret, '\r', "");
+    ret = replace_char_with_string(ret, '\n', "<br>");
+    ret = replace_char_with_string(ret, '"', "\\\"");
+    return ret;
+}
+
 UI::UI(Settings &set)
     : app {saucer::application::acquire({.id = "nsui-banner-fixer"})},
       smartview {{.application = app,
@@ -230,7 +239,6 @@ std::string UI::fix_banners()
     this->cia_files = results;
 
     for (const auto &res : results) {
-        this->smartview.execute("console.log(\"wowza\")");
         this->smartview.execute("console.log(" + res.message + ")");
     }
 
@@ -256,10 +264,7 @@ std::string UI::check_requirements()
 std::string UI::get_program_info()
 {
     std::string license_text = this->license;
-    license_text = replace_char_with_string(license_text, '\r', "");
-    license_text = replace_char_with_string(license_text, '\n', "<br>");
-    license_text = replace_char_with_string(license_text, '"', "\\\"");
-
+    license_text = make_string_json_fit(license_text);
     std::string retVal = std::format("{{\"license\": \"{}\", \"compile_time\": \"{}\", \"year\": \"{}\", \"version\": \"{}\"}}", license_text, COMPILE_TIME, YEAR, VERSION);
     return retVal;
 }
