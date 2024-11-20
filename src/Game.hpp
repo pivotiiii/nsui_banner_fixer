@@ -45,8 +45,10 @@ class Game {
   private:
     Settings set;
     std::filesystem::path cia_path;
+    std::filesystem::path cia_path_work;
     std::filesystem::path cwd;
     std::string name;
+    std::string name_work;
     std::string banner_ext;
     versionS version;
 

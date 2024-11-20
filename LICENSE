@@ -14,13 +14,11 @@ nsui_banner_fixer uses the following tools and libraries licensed under the MIT 
 --- 3dstool ---
 Copyright (c) 2014-2020 Daowen Sun
 
---- TCLAP ---
-Copyright (c) 2003 Michael E. Smoot
-Copyright (c) 2004 Daniel Aarno
-Copyright (c) 2017 Google Inc.
-
 --- saucer ---
 Copyright (c) 2023 Saucer
+
+--- windows-ui ---
+Copyright (c) 2020 Vivek Verma
 
 nsui_banner_fixer uses the following tools and libraries licensed under the zlib license:
 
@@ -36,6 +34,9 @@ nsui_banner_fixer uses the following tools and libraries licensed under the BSD-
 
 --- stdcapture ---
 Copyright (c) 2021, Dmitry Mikushin
+
+--- CLI11 ---
+Copyright (c) 2017-2024 University of Cincinnati, developed by Henry Schreiner under NSF AWARD 1414736
 
 nsui_banner_fixer uses the following tools and libraries licensed under the LGPL-3.0 license:
 

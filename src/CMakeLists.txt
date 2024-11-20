@@ -25,7 +25,7 @@ add_library(nsui_banner_fixer_game
 target_include_directories(nsui_banner_fixer_game INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(nsui_banner_fixer_game PRIVATE cxx_std_20)
 
-target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game TCLAP pathfind)
+target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game CLI11 pathfind)
 
 #----------------------------------------------------------------------------------------
 # UI
@@ -84,13 +84,15 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
                 COMMAND ${CMAKE_COMMAND} -E make_directory
                         $<TARGET_FILE_DIR:nsui_banner_fixer>/tools
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        ${3dstool_SOURCE_DIR}/3dstool.exe
-                        ${ctrtool_SOURCE_DIR}/ctrtool.exe
-                        ${makerom_SOURCE_DIR}/makerom.exe
+                        ${CMAKE_SOURCE_DIR}/tools/3dstool.exe
+                        ${CMAKE_SOURCE_DIR}/tools/ctrtool.exe
+                        ${CMAKE_SOURCE_DIR}/tools/makerom.exe
                         $<TARGET_FILE_DIR:nsui_banner_fixer>/tools)
 
         #use utf8 codepage, makes filename like Pok_é_mon work
         target_sources(nsui_banner_fixer PRIVATE utf8.manifest)
+
+        target_compile_options(nsui_banner_fixer_game PUBLIC /utf-8)
 endif()
 
 #----------------------------------------------------------------------------------------

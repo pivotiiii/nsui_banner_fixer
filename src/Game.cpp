@@ -65,12 +65,27 @@ const std::vector<std::string> locale_codes = {
     "USA_SP",
     "USA_PO"};
 
+std::string remove_non_ASCII(const std::string &str)
+{
+    std::string result;
+    for (char c : str) {
+        if (static_cast<unsigned char>(c) < 128 && !std::isspace(static_cast<unsigned char>(c))) {
+            result = result + c;
+        }
+    }
+    if (result.length() == 0) {
+        result = "file";
+    }
+
+    return result;
+}
+
 Fix_Banner_Result fix_cia(const fs::path &path, const Settings &set)
 {
     Fix_Banner_Result res;
     try {
         res = Game(path, set).fix_banner();
-    } catch (const std::system_error &e) { // this happens if e.g. the console is set to russian codepage and the cia path contains an accent somewhere
+    } catch (const std::system_error &e) { // should not happen anymore
         res.message = e.what();
         res.message.append("\nSometimes this happens if your OS is set to a language other than English and the cia path contains accents or other special characters "
                            "(Both the full path to the folder the .cia file is in as well as the file itself). "
@@ -84,13 +99,16 @@ Fix_Banner_Result fix_cia(const fs::path &path, const Settings &set)
 
 Game::Game(const fs::path &cia, const Settings &set)
     : cia_path(cia),
-      name(cia.stem().string()),
-      cwd(fs::current_path() / "temp" / cia.stem().string()),
       set(set),
       banner_ext("bin")
 {
-    this->version = get_version();
+    this->name = cia.stem().string();
+    this->name_work = remove_non_ASCII(this->name);
+    this->cwd = fs::relative(fs::current_path() / "temp" / this->name_work); // relative to hopefully avoid non ascii in the full path
+    this->cia_path_work = fs::current_path() / "temp" / (this->name_work + ".cia");
     fs::create_directories(cwd);
+    fs::copy_file(cia_path, this->cia_path_work);
+    this->version = get_version();
 }
 
 Game::~Game()
@@ -108,7 +126,7 @@ versionS Game::get_version()
 
     bp::system(bp::exe = set.ctrtool.string(),
                bp::args = {"-i",
-                           this->cia_path.string()},
+                           this->cia_path_work.string()},
                bp::std_out > output_stream,
                ::boost::process::windows::hide);
 
@@ -145,7 +163,7 @@ Proc_Result Game::extract_cia()
 #if defined(_WIN32)
 
     std::vector<std::string> extract_contents = {std::string("--contents=") + (this->cwd / "contents").string(),
-                                                 this->cia_path.string()};
+                                                 this->cia_path_work.string()};
     run_process(set.ctrtool.string(), extract_contents, 1, 0, "Failed to extract contents from .CIA");
 
     std::vector<std::string> split_contents = {"-x", "-t",
@@ -204,7 +222,7 @@ Fix_Banner_Result Game::fix_banner()
     Proc_Result pr;
 
     if (!set.quiet) {
-        std::cout << "--- " << this->cia_path.string() << "\n--- extracting cia\n";
+        std::cout << "--- " << this->cia_path.string() << "\n--- extracting cia" << std::endl;
     }
     pr = this->extract_cia();
     if (!pr.result) {
@@ -214,7 +232,7 @@ Fix_Banner_Result Game::fix_banner()
     }
 
     if (!set.quiet) {
-        std::cout << "--- editing banner\n";
+        std::cout << "--- editing banner" << std::endl;
     }
     pr = this->edit_bcmdl();
     if (!pr.result) {
@@ -224,7 +242,7 @@ Fix_Banner_Result Game::fix_banner()
     }
 
     if (!set.quiet) {
-        std::cout << "--- repacking cia\n";
+        std::cout << "--- repacking cia" << std::endl;
     }
     pr = this->repack_cia();
     if (!pr.result) {
@@ -234,10 +252,9 @@ Fix_Banner_Result Game::fix_banner()
     }
 
     if (!set.quiet) {
-        std::cout << "--- done\n";
+        std::cout << "--- done, saved at --> " << (this->set.replace ? this->cia_path.string() : (this->set.out / (this->name + ".cia")).string()) << std::endl;
     }
     return Fix_Banner_Result(this->cia_path, true);
-    ;
 }
 
 Proc_Result Game::edit_bcmdl()
@@ -296,7 +313,7 @@ Proc_Result Game::repack_cia()
     run_process(set.dstool.string(), rebuild_exefs, 1, 0, "Failed to rebuild exefs");
 
     std::vector<std::string> rebuild_cxi = {"-c", "-t",
-                                            "cxi", "-f", (this->cwd / (this->name + ".cxi")).string(),
+                                            "cxi", "-f", (this->cwd / (this->name_work + ".cxi")).string(),
                                             "--header", (this->cwd / "ncch.header").string(),
                                             "--exh", (this->cwd / "exheader.bin").string(),
                                             "--exefs", (this->cwd / "exefs.bin").string(),
@@ -310,7 +327,7 @@ Proc_Result Game::repack_cia()
         fs::create_directories(this->set.out);
         out_cia = this->set.out / (this->name + ".cia");
     }
-    fs::path content_path_rel = fs::relative(this->cwd / (this->name + ".cxi"), fs::current_path()); // may need checking if file on different drive
+    fs::path content_path_rel = fs::relative(this->cwd / (this->name_work + ".cxi"), fs::current_path()); // may need checking if file on different drive
 
     std::vector<std::string> rebuild_cia = {"-f", "cia",
                                             "-o", out_cia.string(),

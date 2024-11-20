@@ -42,13 +42,15 @@ endif()
 #----------------------------------------------------------------------------------------
 
 FetchContent_Declare(
-    tclap
-    GIT_REPOSITORY      https://git.code.sf.net/p/tclap/code
-    GIT_TAG             4dd8ae4d5c7354db2f38acd76a226e593522c68f #
-    PATCH_COMMAND       git apply "${CMAKE_SOURCE_DIR}/patches/tclap.patch"
+    cl11-download
+    URL                 https://github.com/CLIUtils/CLI11/releases/download/v2.4.2/CLI11.hpp
+    URL_MD5             d7923d1ca06d03e2299e55cad532d126
+    DOWNLOAD_NO_EXTRACT 1
     UPDATE_DISCONNECTED 1
 )
-FetchContent_MakeAvailable(tclap)
+FetchContent_MakeAvailable(cl11-download)
+add_library(CLI11 INTERFACE)
+target_include_directories(CLI11 INTERFACE "${cl11-download_SOURCE_DIR}")
 
 FetchContent_Declare(
     pathfind-download
@@ -92,28 +94,28 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 
     #----------------------------------------------------------------------------------------
 
-    FetchContent_Declare(
-        3dstool
-        URL         https://github.com/dnasdw/3dstool/releases/download/v1.0.9/3dstool.zip
-    )
+    # FetchContent_Declare(
+    #     3dstool
+    #     URL         https://github.com/dnasdw/3dstool/releases/download/v1.0.9/3dstool.zip
+    # )
 
-    FetchContent_Declare(
-        ctrtool
-        URL         https://github.com/3DSGuy/Project_CTR/releases/download/ctrtool-v0.5/ctrtool-win_x86_64-v0.5.zip
-    )
+    # FetchContent_Declare(
+    #     ctrtool
+    #     URL         https://github.com/3DSGuy/Project_CTR/releases/download/ctrtool-v0.5/ctrtool-win_x86_64-v0.5.zip
+    # )
 
-    FetchContent_Declare(
-        makerom
-        URL         https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.15/makerom-win_x86_64-v0.15.zip
-    )
+    # FetchContent_Declare(
+    #     makerom
+    #     URL         https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.15/makerom-win_x86_64-v0.15.zip
+    # )
 
-    FetchContent_MakeAvailable(3dstool ctrtool makerom)
+    # FetchContent_MakeAvailable(3dstool ctrtool makerom)
 
     #----------------------------------------------------------------------------------------
 
-    install(FILES ${3dstool_SOURCE_DIR}/3dstool.exe DESTINATION tools)
-    install(FILES ${ctrtool_SOURCE_DIR}/ctrtool.exe DESTINATION tools)
-    install(FILES ${makerom_SOURCE_DIR}/makerom.exe DESTINATION tools)
+    install(FILES ${CMAKE_SOURCE_DIR}/tools/3dstool.exe DESTINATION tools)
+    install(FILES ${CMAKE_SOURCE_DIR}/tools/ctrtool.exe DESTINATION tools)
+    install(FILES ${CMAKE_SOURCE_DIR}/tools/makerom.exe DESTINATION tools)
 endif()
 
 #----------------------------------------------------------------------------------------

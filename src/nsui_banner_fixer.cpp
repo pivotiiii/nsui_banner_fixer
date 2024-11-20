@@ -6,17 +6,20 @@
 #include "Windows.h"
 #endif
 
-#include "Game.hpp"
-#include "Settings.hpp"
-
 #ifdef GUI
 #include "UI.hpp"
-#else
+#endif
+
+#if defined(_WIN32) && !defined(GUI)
 #include "ArgsParser.hpp"
+#include <chrono>
 #include <thread>
 #endif
 
 #include <pathfind.hpp>
+
+#include "Game.hpp"
+#include "Settings.hpp"
 
 #ifndef VERSION
 #define VERSION "0.0.0"
@@ -30,6 +33,21 @@
 
 namespace fs = std::filesystem;
 
+#ifdef _WIN32
+typedef struct Codepage_Manager {
+    UINT old_page;
+
+    Codepage_Manager()
+    {
+        this->old_page = GetConsoleOutputCP();
+        SetConsoleOutputCP(CP_UTF8);
+    };
+    ~Codepage_Manager()
+    {
+        SetConsoleOutputCP(this->old_page);
+    };
+} Codepage_Manager;
+#endif
 #if defined(_WIN32) && !defined(GUI)
 bool check_requirements(std::vector<fs::path> reqs)
 {
@@ -68,6 +86,9 @@ int WINAPI WinMain(HINSTANCE hInt, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCm
 #else
 int main(int argc, char* argv[])
 {
+#endif
+#ifdef _WIN32
+    Codepage_Manager man;
 #endif
 
     Settings set;
