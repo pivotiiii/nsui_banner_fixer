@@ -38,4 +38,5 @@ out/*
 in/*
 include
 !test*.cia
+*Kopie*.cia
 TODO.md

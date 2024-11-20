@@ -13,6 +13,7 @@
 #include "UI.hpp"
 #else
 #include "ArgsParser.hpp"
+#include <thread>
 #endif
 
 #include <pathfind.hpp>

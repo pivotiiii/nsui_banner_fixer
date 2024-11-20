@@ -52,7 +52,7 @@ if (BUILD_GUI)
         add_custom_command(
             OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/ui/embedded/all.hpp
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/embedded_files
+            COMMAND ${CMAKE_COMMAND} -E rm -fr ${CMAKE_CURRENT_BINARY_DIR}/embedded_files
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/ui ${CMAKE_CURRENT_BINARY_DIR}/embedded_files
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/LICENSE ${CMAKE_CURRENT_BINARY_DIR}/embedded_files/LICENSE.txt
             COMMAND npx.cmd saucer embed ${CMAKE_CURRENT_BINARY_DIR}/embedded_files ${CMAKE_CURRENT_BINARY_DIR}/ui/embedded >nul 2>&1 #windows only rn

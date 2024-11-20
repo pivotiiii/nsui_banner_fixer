@@ -66,15 +66,29 @@ target_include_directories(pathfind PUBLIC "${pathfind-download_SOURCE_DIR}/src"
 #----------------------------------------------------------------------------------------
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-    FetchContent_Declare(
-      Boost
-      URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz
-      URL_MD5 893b5203b862eb9bbd08553e24ff146a
-      DOWNLOAD_EXTRACT_TIMESTAMP ON
-      EXCLUDE_FROM_ALL
-    )
-    set(BOOST_INCLUDE_LIBRARIES process)
-    FetchContent_MakeAvailable(Boost)
+    if(BUILD_GUI)
+        FetchContent_Declare(
+            Boost_saucer_fix
+            URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz
+            URL_MD5 893b5203b862eb9bbd08553e24ff146a
+            DOWNLOAD_EXTRACT_TIMESTAMP ON
+            PATCH_COMMAND git --git-dir= apply --reject "${CMAKE_SOURCE_DIR}/patches/boost_disable_pp.patch"
+            EXCLUDE_FROM_ALL
+        )
+        set(BOOST_INCLUDE_LIBRARIES process)
+        FetchContent_MakeAvailable(Boost_saucer_fix)
+    else()
+        FetchContent_Declare(
+            Boost
+            URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz
+            URL_MD5 893b5203b862eb9bbd08553e24ff146a
+            DOWNLOAD_EXTRACT_TIMESTAMP ON
+            EXCLUDE_FROM_ALL
+        )
+        set(BOOST_INCLUDE_LIBRARIES process)
+        FetchContent_MakeAvailable(Boost)
+    endif()    
+    
 
     #----------------------------------------------------------------------------------------
 
