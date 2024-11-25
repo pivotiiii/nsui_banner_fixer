@@ -161,7 +161,34 @@ target_sources(nsui_banner_fixer PRIVATE ${ProductVersionFiles})
 # install
 #----------------------------------------------------------------------------------------
 
-install(TARGETS nsui_banner_fixer DESTINATION .)
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+        install(TARGETS nsui_banner_fixer DESTINATION .)
         install(FILES ${CMAKE_SOURCE_DIR}/tools/3dstool.exe DESTINATION tools)
         install(FILES ${CMAKE_SOURCE_DIR}/tools/ctrtool.exe DESTINATION tools)
         install(FILES ${CMAKE_SOURCE_DIR}/tools/makerom.exe DESTINATION tools)
+elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+        install(TARGETS nsui_banner_fixer DESTINATION . COMPONENT application)
+        set(DESKTOP_FILE 
+"[Desktop Entry]
+Name=NSUI Banner Fixer
+Exec=nsui_banner_fixer %F
+Icon=icon2
+Type=Application
+Terminal=false
+Categories=Utility;
+Comment=Fixes NSUIv28 3D GBA banners for non US consoles.
+")
+        set(APP_DIR "${CMAKE_BINARY_DIR}/AppDir")
+        set(APP_IMAGE_TOOL "appimagetool-855-x86_64.AppImage")
+        set(AIT "${CMAKE_BINARY_DIR}/${APP_IMAGE_TOOL}")
+        install(CODE "file(REMOVE_RECURSE ${APP_DIR})" COMPONENT appimage)
+        install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_DIR:nsui_banner_fixer>/nsui_banner_fixer ${APP_DIR}/usr/bin/nsui_banner_fixer)" COMPONENT appimage)
+        install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ui/icon2.png ${APP_DIR}/icon2.png)" COMPONENT appimage)
+        install(CODE "file(WRITE ${APP_DIR}/usr/share/applications/nbf.desktop \"${DESKTOP_FILE}\")" COMPONENT appimage)
+        install(CODE "execute_process(COMMAND wget -nc https://github.com/probonopd/go-appimage/releases/download/continuous/${APP_IMAGE_TOOL})" COMPONENT appimage)
+        install(CODE "execute_process(COMMAND chmod +x ${APP_IMAGE_TOOL})" COMPONENT appimage)
+        install(CODE "execute_process(COMMAND ${AIT} -s deploy ${APP_DIR}/usr/share/applications/nbf.desktop OUTPUT_QUIET ERROR_QUIET)" COMPONENT appimage)
+        install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env VERSION=${nsui_banner_fixer_VERSION} ${AIT} ${APP_DIR})" COMPONENT appimage)
+        install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E rename ${CMAKE_BINARY_DIR}/NSUI_Banner_Fixer-${nsui_banner_fixer_VERSION}-x86_64.AppImage ${CMAKE_BINARY_DIR}/nsui_banner_fixer-${nsui_banner_fixer_VERSION}-x86_64.AppImage)" COMPONENT appimage)
+        #install(FILES ${CMAKE_BINARY_DIR}/nsui_banner_fixer-${nsui_banner_fixer_VERSION}-x86_64.AppImage DESTINATION . COMPONENT appimage) #don't need to zip the appimage
+endif()
