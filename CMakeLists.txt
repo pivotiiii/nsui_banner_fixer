@@ -30,6 +30,7 @@ set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_BINARY_NSIS OFF)
 set(CPACK_BINARY_ZIP ON)
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    set(CPACK_CMAKE_GENERATOR Ninja) #fakes using Ninja to prevent preinstall step with Unix makefiles
     set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
     set(CPACK_COMPONENTS_ALL appimage application)
 endif()

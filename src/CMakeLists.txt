@@ -190,5 +190,5 @@ Comment=Fixes NSUIv28 3D GBA banners for non US consoles.
         install(CODE "execute_process(COMMAND ${AIT} -s deploy ${APP_DIR}/usr/share/applications/nbf.desktop OUTPUT_QUIET ERROR_QUIET)" COMPONENT appimage)
         install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env VERSION=${nsui_banner_fixer_VERSION} ${AIT} ${APP_DIR})" COMPONENT appimage)
         install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E rename ${CMAKE_BINARY_DIR}/NSUI_Banner_Fixer-${nsui_banner_fixer_VERSION}-x86_64.AppImage ${CMAKE_BINARY_DIR}/nsui_banner_fixer-${nsui_banner_fixer_VERSION}-x86_64.AppImage)" COMPONENT appimage)
-        #install(FILES ${CMAKE_BINARY_DIR}/nsui_banner_fixer-${nsui_banner_fixer_VERSION}-x86_64.AppImage DESTINATION . COMPONENT appimage) #don't need to zip the appimage
+        install(FILES ${CMAKE_BINARY_DIR}/nsui_banner_fixer-${nsui_banner_fixer_VERSION}-x86_64.AppImage DESTINATION . COMPONENT appimage)
 endif()
