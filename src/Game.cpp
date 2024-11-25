@@ -147,7 +147,7 @@ versionS Game::get_version()
 
 #elif defined(__linux__)
 
-    Tool::CTR ctr(cia_path, cwd, set);
+    Tool::CTR ctr(cia_path_work, cwd, set);
     versionS version = ctr.get_cia_version();
 
 #endif
@@ -194,12 +194,12 @@ Proc_Result Game::extract_cia()
 
 #elif defined(__linux__)
 
-    Tool::CTR ctr(cia_path, cwd, set);
+    Tool::CTR ctr(cia_path_work, cwd, set);
     if (!ctr.extract_cia_contents()) {
         return Proc_Result(false, "Failed to extract contents from .CIA");
     }
 
-    Tool::DS ds(name, cwd, set);
+    Tool::DS ds(name_work, cwd, set);
     if (!ds.split_contents()) {
         return Proc_Result(false, "Failed to split contents");
     }
@@ -341,7 +341,7 @@ Proc_Result Game::repack_cia()
 
 #elif defined(__linux__)
 
-    Tool::DS ds(name, cwd, set);
+    Tool::DS ds(name_work, cwd, set);
 
     if (!ds.rebuild_banner()) {
         return Proc_Result(false, "Failed to rebuild banner");
@@ -363,7 +363,7 @@ Proc_Result Game::repack_cia()
         out_cia = this->set.out / (this->name + ".cia");
     }
 
-    Tool::MakeRom mr(name, out_cia, version, set);
+    Tool::MakeRom mr(name_work, out_cia, version, set);
 
     if (!mr.rebuild_cia()) {
         return Proc_Result(false, "Failed to rebuild CIA");

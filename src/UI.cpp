@@ -56,6 +56,11 @@ UI::UI(Settings &set)
 {
     this->set = set;
     this->set.replace = true;
+#ifdef _WIN32
+    this->set.quiet = false;
+#else
+    this->set.quiet = true;
+#endif
 
     this->smartview.set_title("NSUI Banner Fixer");
     this->smartview.set_decorations(false);
@@ -246,6 +251,7 @@ std::string UI::fix_banners()
 
 std::string UI::check_requirements()
 {
+#ifdef _WIN32
     std::vector<fs::path> reqs {set.dstool, set.ctrtool, set.makerom};
     uint8_t err_count = 0;
     std::string missing_files;
@@ -258,6 +264,10 @@ std::string UI::check_requirements()
     missing_files = missing_files.substr(0, missing_files.size() - 1);
     std::string retVal = std::format("{{\"result\": {}, \"err_count\": {}, \"missing_files\": [{}]}}", (err_count == 0 ? "true" : "false"), err_count, missing_files);
     return retVal;
+#else
+    std::string retVal = std::format("{{\"result\": {}, \"err_count\": {}, \"missing_files\": [{}]}}", "true", 0, "");
+    return retVal;
+#endif
 }
 
 std::string UI::get_program_info()

@@ -13,14 +13,18 @@ list(APPEND CMAKE_MODULE_PATH "${cmakehelpers_SOURCE_DIR}")
 
 if(BUILD_GUI)
     find_program(npm_EXE npm REQUIRED)
-    message("${npm_EXE}.cmd install @saucer-dev/cli")
+    find_program(npx_EXE npx REQUIRED)
+    if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+        string(APPEND npm_EXE ".cmd")
+        string(APPEND npx_EXE ".cmd")
+    endif()    
+    message("${npm_EXE} install @saucer-dev/cli")
     execute_process(
-        COMMAND ${npm_EXE}.cmd install @saucer-dev/cli #Windows specific with the .cmd
+        COMMAND ${npm_EXE} install @saucer-dev/cli
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         OUTPUT_VARIABLE npm_OUTPUT
     )
     message(${npm_OUTPUT})
-
 
     FetchContent_Declare(
         saucer 
@@ -38,6 +42,11 @@ if(BUILD_GUI)
     FetchContent_MakeAvailable(tinyfiledialogs-download)
     add_library(tinyfiledialogs STATIC "${tinyfiledialogs-download_SOURCE_DIR}/tinyfiledialogs.c")
     target_include_directories(tinyfiledialogs PUBLIC "${tinyfiledialogs-download_SOURCE_DIR}")
+
+    #ubuntu 24.04
+    #sudo apt-get install pkg-config
+    #sudo apt-get install libadwaita-1-dev
+    #sudo apt-get install libwebkitgtk-6.0-dev
 endif()
 #----------------------------------------------------------------------------------------
 
@@ -112,10 +121,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     # FetchContent_MakeAvailable(3dstool ctrtool makerom)
 
     #----------------------------------------------------------------------------------------
-
-    install(FILES ${CMAKE_SOURCE_DIR}/tools/3dstool.exe DESTINATION tools)
-    install(FILES ${CMAKE_SOURCE_DIR}/tools/ctrtool.exe DESTINATION tools)
-    install(FILES ${CMAKE_SOURCE_DIR}/tools/makerom.exe DESTINATION tools)
 endif()
 
 #----------------------------------------------------------------------------------------
@@ -137,10 +142,11 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
         GIT_REPOSITORY      https://github.com/dnasdw/3dstool.git
         GIT_TAG             9c4336bca8898f3860b41241b8a7d9d4a6772e79
         GIT_PROGRESS        TRUE
+        SOURCE_SUBDIR       PREVENTCMAKELISTTXT
         PATCH_COMMAND       git apply "${CMAKE_CURRENT_SOURCE_DIR}/patches/3dstool.patch"
         UPDATE_DISCONNECTED 1
     )
-    FetchContent_Populate(3dstool_download)
+    FetchContent_MakeAvailable(3dstool_download)
     file(GLOB 3dstool_sources ${3dstool_download_SOURCE_DIR}/src/*.cpp)
 
     file(GLOB capstone_sources 
@@ -179,7 +185,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
     FetchContent_Declare(
         project_ctr_download
         GIT_REPOSITORY      https://github.com/3DSGuy/Project_CTR.git
-        GIT_TAG             master
+        GIT_TAG             c0488dcb6c3048e6a519716f2b21e2c65859ca75
         GIT_PROGRESS        TRUE
         PATCH_COMMAND       git apply "${CMAKE_CURRENT_SOURCE_DIR}/patches/ctr.patch"
         UPDATE_DISCONNECTED 1

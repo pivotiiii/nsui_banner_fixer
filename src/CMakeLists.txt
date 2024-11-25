@@ -49,13 +49,18 @@ if (BUILD_GUI)
         target_compile_definitions(nsui_banner_fixer_ui PRIVATE YEAR="${year}")
         target_compile_definitions(nsui_banner_fixer_ui PRIVATE COMPILE_TIME="${compile_time}")
 
+        if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+                set(REROUTE ">nul 2>&1")
+        elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+                set(REROUTE "")
+        endif() 
         add_custom_command(
             OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/ui/embedded/all.hpp
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             COMMAND ${CMAKE_COMMAND} -E rm -fr ${CMAKE_CURRENT_BINARY_DIR}/embedded_files
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/ui ${CMAKE_CURRENT_BINARY_DIR}/embedded_files
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/LICENSE ${CMAKE_CURRENT_BINARY_DIR}/embedded_files/LICENSE.txt
-            COMMAND npx.cmd saucer embed ${CMAKE_CURRENT_BINARY_DIR}/embedded_files ${CMAKE_CURRENT_BINARY_DIR}/ui/embedded >nul 2>&1 #windows only rn
+            COMMAND ${npx_EXE} saucer embed ${CMAKE_CURRENT_BINARY_DIR}/embedded_files ${CMAKE_CURRENT_BINARY_DIR}/ui/embedded ${REROUTE}
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ui/index.html
                     ${CMAKE_CURRENT_SOURCE_DIR}/ui/script.js
                     ${CMAKE_CURRENT_SOURCE_DIR}/ui/style.css
@@ -152,5 +157,11 @@ generate_product_version(ProductVersionFiles
 target_sources(nsui_banner_fixer PRIVATE ${ProductVersionFiles})
 
 
+#----------------------------------------------------------------------------------------
+# install
+#----------------------------------------------------------------------------------------
 
 install(TARGETS nsui_banner_fixer DESTINATION .)
+        install(FILES ${CMAKE_SOURCE_DIR}/tools/3dstool.exe DESTINATION tools)
+        install(FILES ${CMAKE_SOURCE_DIR}/tools/ctrtool.exe DESTINATION tools)
+        install(FILES ${CMAKE_SOURCE_DIR}/tools/makerom.exe DESTINATION tools)

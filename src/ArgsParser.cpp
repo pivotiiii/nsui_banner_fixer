@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 
 bool get_cia_files(fs::path ciaArg, std::vector<fs::path> &cias)
 {
-    if (fs::exists(fs::absolute(ciaArg))) {
+    if (fs::exists(ciaArg)) {
         if (ciaArg.extension().string() != ".cia") {
             std::cerr << "ERROR: the supplied file is not a .cia file!\n";
             return false;
@@ -60,7 +60,7 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &set
     }
 
     if (licenseArg) {
-        std::cout << "nsui_banner_fixer " << VERSION << "\nCopyright (c) " << YEAR << " pivotiii\n\nFull license info is available at https://raw.githubusercontent.com/pivotiiii/nsui_banner_fixer/refs/heads/master/LICENSE\n";
+        std::cout << "nsui_banner_fixer " << VERSION << "\nCopyright (c) " << YEAR << " pivotiii\nFull license info is available at https://raw.githubusercontent.com/pivotiiii/nsui_banner_fixer/refs/heads/master/LICENSE\n";
         return 2;
     }
 
@@ -69,9 +69,13 @@ int parse_args(int argc, char** argv, std::vector<fs::path> &cias, Settings &set
     }
 
     if (cias.size() == 0 || helpArg) {
+#ifdef _WIN32
         pause_if_double_clicked(false, 100); // output gets corrupted otherwise :(
         std::cout << app.help() << std::endl;
         pause_if_double_clicked();
+#else
+        std::cout << app.help() << std::endl;
+#endif
         return 2;
     }
 

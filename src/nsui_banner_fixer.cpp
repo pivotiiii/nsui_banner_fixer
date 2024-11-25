@@ -8,10 +8,11 @@
 
 #ifdef GUI
 #include "UI.hpp"
+#else
+#include "ArgsParser.hpp"
 #endif
 
 #if defined(_WIN32) && !defined(GUI)
-#include "ArgsParser.hpp"
 #include <chrono>
 #include <thread>
 #endif
