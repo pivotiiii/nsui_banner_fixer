@@ -17,28 +17,31 @@
 <body>
 
     <div id="windowBarContainer" class="window-bar">
-        <div id="windowBarLeftResizeContainer" class="window-edge-left">
-            <div id="windowBarLeftCornerResize" class="window-edge-top" data-webview-resize="tl"></div>
-            <div id="windowBarLeftResize" data-webview-resize="l"></div>
+        <div id="windowBarLeftResizeContainer" class="window-edge-left drag-when-maximized">
+            <div id="windowBarLeftCornerResize" class="window-edge-top hide-when-maximized" data-webview-resize="tl">
+            </div>
+            <div id="windowBarLeftResize" class="hide-when-maximized" data-webview-resize="l"></div>
         </div>
 
         <div id="windowBarCenterContainer">
-            <div id="windowBarCenterResizeContainer" class="window-edge-top">
-                <div id="windowBarCenterLeftResize" data-webview-resize="tl"></div>
-                <div id="windowBarCenterTopResize" data-webview-resize="t"></div>
+            <div id="windowBarCenterResizeContainer" class="window-edge-top drag-when-maximized">
+                <div id="windowBarCenterLeftResize" class="hide-when-maximized" data-webview-resize="tl"></div>
+                <div id="windowBarCenterTopResize" class="hide-when-maximized" data-webview-resize="t"></div>
             </div>
             <div id="windowBarCenter" data-webview-drag></div>
         </div>
 
         <div id="infoButtonContainer" class="window-bar-button-container window-edge-top">
-            <div id="infoButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
+            <div id="infoButtonResize" class="window-bar-button-resize hide-when-maximized" data-webview-resize="t">
+            </div>
             <div id="infoButton" class="window-bar-button" style="margin-bottom: 4px;">
                 <i class="qlementine-icons--info-16"></i>
             </div>
         </div>
 
         <div id="colorButtonContainer" class="window-bar-button-container window-edge-top">
-            <div id="colorButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
+            <div id="colorButtonResize" class="window-bar-button-resize hide-when-maximized" data-webview-resize="t">
+            </div>
             <div id="colorButton" class="window-bar-button">
                 <i class="icons10-sun visible-darkmode"></i>
                 <i class="icons10-moon visible-lightmode"></i>
@@ -46,12 +49,14 @@
         </div>
 
         <div id="minButtonContainer" class="window-bar-button-container window-edge-top">
-            <div id="minButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
+            <div id="minButtonResize" class="window-bar-button-resize hide-when-maximized" data-webview-resize="t">
+            </div>
             <div id="minButton" class="window-bar-button"><i class="icons10-minus"></i></div>
         </div>
 
         <div id="maxButtonContainer" class="window-bar-button-container window-edge-top">
-            <div id="maxButtonResize" class="window-bar-button-resize" data-webview-resize="t"></div>
+            <div id="maxButtonResize" class="window-bar-button-resize hide-when-maximized" data-webview-resize="t">
+            </div>
             <div id="maxButton" class="window-bar-button">
                 <i id="maxIcon" class="qlementine-icons--windows-maximize-16"></i>
                 <i id="unmaxIcon" class="qlementine-icons--windows-unmaximize-16 hide-icon"></i>
@@ -59,17 +64,19 @@
         </div>
 
         <div id="closeButtonContainer" class="window-bar-button-container">
-            <div id="closeButtonResizeTopContainer" class="window-bar-button-resize window-edge-top">
-                <div id="closeButtonResizeTop" data-webview-resize="t"></div>
-                <div id="closeButtonResizeTopCorner" class="window-edge-right" data-webview-resize="tr">
+            <div id="closeButtonResizeTopContainer"
+                class="window-bar-button-resize hide-when-maximized window-edge-top">
+                <div id="closeButtonResizeTop" class="hide-when-maximized" data-webview-resize="t"></div>
+                <div id="closeButtonResizeTopCorner" class="window-edge-right hide-when-maximized"
+                    data-webview-resize="tr">
                 </div>
             </div>
             <div id="closeButtonContainer2">
                 <div id="closeButton" class="window-bar-button"><i class="icons10-cross"></i></div>
-                <div id="closeButtonResizeRightContainer" class="window-edge-right">
-                    <div id="closeButtonResizeRightCorner" data-webview-resize="tr">
+                <div id="closeButtonResizeRightContainer" class="window-edge-right hide-when-maximized">
+                    <div id="closeButtonResizeRightCorner" class="hide-when-maximized" data-webview-resize="tr">
                     </div>
-                    <div id="closeButtonResizeRight" data-webview-resize="r">
+                    <div id="closeButtonResizeRight" class="hide-when-maximized" data-webview-resize="r">
                     </div>
                 </div>
             </div>
@@ -79,9 +86,9 @@
     <div id="window">
 
         <div id="resizeBarLeft" class="resize-bar-ver window-edge-left">
-            <div id="resizeLeft" class="resize-bar-ver-center" data-webview-resize="l">
+            <div id="resizeLeft" class="resize-bar-ver-center hide-when-maximized" data-webview-resize="l">
             </div>
-            <div id="resizeLeftBottom" class="resize-bar-ver-corner" data-webview-resize="bl">
+            <div id="resizeLeftBottom" class="resize-bar-ver-corner hide-when-maximized" data-webview-resize="bl">
             </div>
         </div>
 
@@ -137,15 +144,16 @@
         </div>
 
         <div id="resizeBarRight" class="resize-bar-ver window-edge-right">
-            <div id="resizeRight" class="resize-bar-ver-center" data-webview-resize="r"></div>
-            <div id="resizeRightBottom" class="resize-bar-ver-corner" data-webview-resize="br"></div>
+            <div id="resizeRight" class="resize-bar-ver-center hide-when-maximized" data-webview-resize="r"></div>
+            <div id="resizeRightBottom" class="resize-bar-ver-corner hide-when-maximized" data-webview-resize="br">
+            </div>
         </div>
     </div>
 
     <div id="resizeBarBottom" class="resize-bar-hor resize-bar-hor-bottom window-edge-bottom">
-        <div id="resizeBottomLeft" class="resize-bar-hor-corner" data-webview-resize="bl"></div>
-        <div id="resizeBottom" class="resize-bar-hor-center" data-webview-resize="b"></div>
-        <div id="resizeBottomRight" class="resize-bar-hor-corner" data-webview-resize="br"></div>
+        <div id="resizeBottomLeft" class="resize-bar-hor-corner hide-when-maximized" data-webview-resize="bl"></div>
+        <div id="resizeBottom" class="resize-bar-hor-center hide-when-maximized" data-webview-resize="b"></div>
+        <div id="resizeBottomRight" class="resize-bar-hor-corner hide-when-maximized" data-webview-resize="br"></div>
     </div>
 
     <div id="successBar" class="app-alert-bar alert-bar-success unselectable" role="alert">

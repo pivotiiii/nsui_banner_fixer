@@ -27,10 +27,12 @@ class UI {
     std::string remove_cia(const int &req);
     std::string fix_banners();
     void set_replace_files(const bool &replace);
+    void toggle_maximized();
     std::string check_requirements();
     std::string get_program_info();
     bool select_save_location();
     void expose_functions();
+    void subscribe_events();
 
   public:
     UI(Settings &set);

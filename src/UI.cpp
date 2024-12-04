@@ -79,6 +79,7 @@ UI::UI(Settings &set)
     this->license = reinterpret_cast<const char*>(license_data);
 
     this->expose_functions();
+    this->subscribe_events();
 
     this->smartview.serve("index.html");
     this->smartview.show();
@@ -96,12 +97,8 @@ void UI::expose_functions()
         this->app->quit();
     });
 
-    this->smartview.expose("maximize", [&]() {
-        this->smartview.set_maximized(true);
-    });
-
-    this->smartview.expose("unmaximize", [&]() {
-        this->smartview.set_maximized(false);
+    this->smartview.expose("toggle_maximize", [&]() {
+        this->toggle_maximized();
     });
 
     this->smartview.expose("minimize", [&]() {
@@ -130,6 +127,13 @@ void UI::expose_functions()
 
     this->smartview.expose("get_program_info", [&]() -> std::string {
         return this->get_program_info();
+    });
+}
+
+void UI::subscribe_events()
+{
+    this->smartview.on<saucer::window_event::maximize>([&](bool state) {
+        this->smartview.execute("setMaxDeco({})", state);
     });
 }
 
@@ -221,6 +225,15 @@ std::string UI::remove_cia(const int &req)
 void UI::set_replace_files(const bool &replace)
 {
     this->set.replace = replace;
+}
+
+void UI::toggle_maximized()
+{
+    if (this->smartview.maximized() == true) {
+        this->smartview.set_maximized(false);
+    } else {
+        this->smartview.set_maximized(true);
+    }
 }
 
 std::string UI::fix_banners()
