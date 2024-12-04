@@ -68,7 +68,7 @@ UI::UI(Settings &set)
     this->smartview.set_min_size(460, 425);
     this->smartview.set_size(800, 550);
 
-    this->smartview.set_dev_tools(true);
+    this->smartview.set_dev_tools(false);
 
     this->smartview.embed(saucer::embedded::all());
 
@@ -134,6 +134,10 @@ void UI::subscribe_events()
 {
     this->smartview.on<saucer::window_event::maximize>([&](bool state) {
         this->smartview.execute("setMaxDeco({})", state);
+    });
+
+    this->smartview.on<saucer::window_event::focus>([&](bool state) {
+        this->smartview.execute("setFocus({})", state);
     });
 }
 

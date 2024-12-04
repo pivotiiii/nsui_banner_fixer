@@ -15,6 +15,7 @@ body {
     --resize-bar-size: 5px;
     --resize-corner-size: 16px;
     --border-color: var(--dark, #333333) var(--light, #8a8a8a);
+    --window-bar-icon-color-no-focus: var(--dark, #666666) var(--light, #8a8a8a);
 }
 
 .visible-darkmode {

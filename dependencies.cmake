@@ -29,7 +29,7 @@ if(BUILD_GUI)
     FetchContent_Declare(
         saucer 
         GIT_REPOSITORY "https://github.com/saucer/saucer" 
-        GIT_TAG 574313dad290490076f29b52472cbb8b93aefb15 # sonst v4.2.0
+        GIT_TAG 5daeca384041e70f7b34c1c661e5077f9d652292 # sonst v4.2.0
     )
     FetchContent_MakeAvailable(saucer)
 

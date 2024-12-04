@@ -1,6 +1,6 @@
 const getElementsDeco = ids => Object.assign({}, ...ids.map(id => ({ [id]: document.getElementById(id) })));
 const uiDeco = getElementsDeco(["closeButton", "minButton", "maxButton", "windowBarCenter", "colorButton", "maxIcon", "unmaxIcon"]);
-const r = document.querySelector(':root');
+const r = document.querySelector(":root");
 const resizeEdges = document.querySelectorAll(".hide-when-maximized");
 const dragMaxEdges = document.querySelectorAll(".drag-when-maximized");
 
@@ -35,7 +35,7 @@ function setMaxDeco(maxState) {
         for (let index = 0; index < dragMaxEdges.length; index++) {
             dragMaxEdges[index].setAttribute("data-webview-drag", "");
         }
-        r.style.setProperty("--border-color", "var(--dark, rgb(17, 17, 17)) var(--light, rgb(255, 255, 255))");
+        r.style.setProperty("--border-color", "var(--window-bar-background-color)");
     } else {
         uiDeco.unmaxIcon.classList.add("hide-icon");
         uiDeco.maxIcon.classList.remove("hide-icon");
@@ -46,6 +46,15 @@ function setMaxDeco(maxState) {
         for (let index = 0; index < dragMaxEdges.length; index++) {
             dragMaxEdges[index].removeAttribute("data-webview-drag");
         }
-        r.style.setProperty("--border-color", "var(--dark, #333333) var(--light, #8a8a8a)");
+        r.style.removeProperty("--border-color");
+    }
+}
+
+function setFocus(focusState) {
+    const wbc = document.getElementById("windowBarContainer");
+    if (focusState === true) {
+        wbc.style.removeProperty("color");
+    } else {
+        wbc.style.setProperty("color", "var(--window-bar-icon-color-no-focus)");
     }
 }
