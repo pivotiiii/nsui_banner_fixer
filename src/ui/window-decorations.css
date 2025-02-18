@@ -7,14 +7,13 @@ body {
 :root {
     --window-bar-close-button-hover-color: red;
     --window-bar-close-button-click-color: rgb(197, 0, 0);
-    --window-bar-background-color: var(--dark, rgb(17, 17, 17)) var(--light, rgb(255, 255, 255));
-    --window-bar-button-hover-color: var(--dark, #262626) var(--light, #E8E8E8);
-    --window-bar-button-click-color: var(--dark, #353535) var(--light, #cacaca);
+    --window-bar-background-color: var(--dark, #111111) var(--light, #ffffff);
+    --window-bar-button-hover-color: var(--dark, #2d2d2d) var(--light, #E8E8E8);
+    --window-bar-button-click-color: var(--dark, #262626) var(--light, #d8d8d8);
     --window-bar-button-width: 48px;
     --window-bar-height: 32px;
     --resize-bar-size: 5px;
     --resize-corner-size: 16px;
-    --border-color: var(--dark, #333333) var(--light, #8a8a8a);
     --window-bar-icon-color-no-focus: var(--dark, #666666) var(--light, #8a8a8a);
 }
 
@@ -70,25 +69,21 @@ body {
 .window-edge-top {
     border-top-width: 1px;
     border-top-style: solid;
-    border-top-color: var(--border-color);
 }
 
 .window-edge-left {
     border-left-width: 1px;
     border-left-style: solid;
-    border-left-color: var(--border-color);
 }
 
 .window-edge-right {
     border-right-width: 1px;
     border-right-style: solid;
-    border-right-color: var(--border-color);
 }
 
 .window-edge-bottom {
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    border-bottom-color: var(--border-color);
 }
 
 #windowBarContainer {

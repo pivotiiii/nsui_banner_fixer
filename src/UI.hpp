@@ -15,7 +15,7 @@ class UI {
     std::string license;
 
     std::shared_ptr<saucer::application> app;
-    saucer::smartview<saucer::serializers::glaze::serializer> smartview;
+    saucer::smartview<saucer::serializers::rflpp::serializer> smartview;
 
     std::string add_cias();
     void add_path(const std::filesystem::path &path);

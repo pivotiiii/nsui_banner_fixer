@@ -9,7 +9,7 @@ option(BUILD_GUI "Build with GUI instead of as a console application." ON)
 option(BUILD_TESTS "Build tests." ON)
 option(DYNAMIC_LINKING "Link CURL and OPENSSL dynamic instead of static. (Linux only)" OFF)
 option(STATIC_STD_LIBS "Link libstdc++ and libgcc static instead of dynamic. (Linux only)" OFF)
-
+set(saucer_serializer "Rflpp") #remove once glaze bug is fixed in msvc
 include(dependencies.cmake)
 add_subdirectory(src)
 

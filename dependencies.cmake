@@ -29,10 +29,10 @@ if(BUILD_GUI)
     FetchContent_Declare(
         saucer 
         GIT_REPOSITORY "https://github.com/saucer/saucer" 
-        GIT_TAG 5daeca384041e70f7b34c1c661e5077f9d652292 # sonst v4.2.0
+        GIT_TAG be6f9c43919b180e98e17ba58963399b835e320f # sonst v6.0.1
     )
     FetchContent_MakeAvailable(saucer)
-
+    set(saucer_serializer "Rflpp")
 
     FetchContent_Declare(
         tinyfiledialogs-download

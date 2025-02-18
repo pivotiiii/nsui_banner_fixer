@@ -50,7 +50,7 @@ std::string make_string_json_fit(const std::string &str)
 }
 
 UI::UI(Settings &set)
-    : app {saucer::application::acquire({.id = "nsui-banner-fixer"})},
+    : app {saucer::application::init({.id = "nsui-banner-fixer"})},
       smartview {{.application = app,
                   .persistent_cookies = false}}
 {
