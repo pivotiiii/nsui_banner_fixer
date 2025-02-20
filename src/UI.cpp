@@ -7,16 +7,6 @@
 
 #include "tinyfiledialogs.h"
 
-#ifndef VERSION
-#define VERSION "0.0.0"
-#endif
-#ifndef YEAR
-#define YEAR "0000"
-#endif
-#ifndef COMPILE_TIME
-#define COMPILE_TIME "0000-00-00 00:00:00 UTC"
-#endif
-
 namespace fs = std::filesystem;
 
 bool containsOnlyASCII(const std::string &filePath)

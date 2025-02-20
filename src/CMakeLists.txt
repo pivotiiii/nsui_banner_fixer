@@ -25,7 +25,15 @@ add_library(nsui_banner_fixer_game
 target_include_directories(nsui_banner_fixer_game INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(nsui_banner_fixer_game PRIVATE cxx_std_20)
 
-target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game CLI11 pathfind)
+target_link_libraries(nsui_banner_fixer PRIVATE nsui_banner_fixer_game pathfind)
+
+#----------------------------------------------------------------------------------------
+# CLI
+#----------------------------------------------------------------------------------------
+
+if (NOT BUILD_GUI)
+        target_link_libraries(nsui_banner_fixer PRIVATE CLI11)
+endif()
 
 #----------------------------------------------------------------------------------------
 # UI
@@ -83,16 +91,8 @@ endif()
 #----------------------------------------------------------------------------------------
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+        target_sources(nsui_banner_fixer PRIVATE tools.rc)
         target_link_libraries(nsui_banner_fixer_game PRIVATE Boost::process)
-        add_custom_command(
-                TARGET nsui_banner_fixer POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E make_directory
-                        $<TARGET_FILE_DIR:nsui_banner_fixer>/tools
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        ${CMAKE_SOURCE_DIR}/tools/3dstool.exe
-                        ${CMAKE_SOURCE_DIR}/tools/ctrtool.exe
-                        ${CMAKE_SOURCE_DIR}/tools/makerom.exe
-                        $<TARGET_FILE_DIR:nsui_banner_fixer>/tools)
 
         #use utf8 codepage, makes filename like Pok_é_mon work
         target_sources(nsui_banner_fixer PRIVATE utf8.manifest)
@@ -163,9 +163,6 @@ target_sources(nsui_banner_fixer PRIVATE ${ProductVersionFiles})
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
         install(TARGETS nsui_banner_fixer DESTINATION .)
-        install(FILES ${CMAKE_SOURCE_DIR}/tools/3dstool.exe DESTINATION tools)
-        install(FILES ${CMAKE_SOURCE_DIR}/tools/ctrtool.exe DESTINATION tools)
-        install(FILES ${CMAKE_SOURCE_DIR}/tools/makerom.exe DESTINATION tools)
 elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
         install(TARGETS nsui_banner_fixer DESTINATION . COMPONENT application)
         set(DESKTOP_FILE 

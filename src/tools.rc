@@ -1,0 +1,9 @@
+#define DSTOOL 52
+#define CTRTOOL 53
+#define MAKEROM 54
+
+#ifdef RC_INVOKED
+DSTOOL RCDATA "..\\tools\\3dstool.exe"
+CTRTOOL RCDATA "..\\tools\\ctrtool.exe"
+MAKEROM RCDATA "..\\tools\\makerom.exe"
+#endif

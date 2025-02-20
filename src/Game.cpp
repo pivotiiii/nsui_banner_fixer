@@ -104,10 +104,10 @@ Game::Game(const fs::path &cia, const Settings &set)
 {
     this->name = cia.stem().string();
     this->name_work = remove_non_ASCII(this->name);
-    this->cwd = fs::relative(fs::current_path() / "temp" / this->name_work); // relative to hopefully avoid non ascii in the full path
-    this->cia_path_work = fs::current_path() / "temp" / (this->name_work + ".cia");
-    fs::create_directories(cwd);
-    fs::copy_file(cia_path, this->cia_path_work);
+    this->cwd = fs::relative(set.cwd / "temp" / this->name_work); // relative to hopefully avoid non ascii in the full path
+    this->cia_path_work = set.cwd / "temp" / (this->name_work + ".cia");
+    fs::create_directories(this->cwd);
+    fs::copy_file(this->cia_path, this->cia_path_work);
     this->version = get_version();
 }
 

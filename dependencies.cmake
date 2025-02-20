@@ -50,16 +50,18 @@ if(BUILD_GUI)
 endif()
 #----------------------------------------------------------------------------------------
 
-FetchContent_Declare(
-    cl11-download
-    URL                 https://github.com/CLIUtils/CLI11/releases/download/v2.4.2/CLI11.hpp
-    URL_MD5             d7923d1ca06d03e2299e55cad532d126
-    DOWNLOAD_NO_EXTRACT 1
-    UPDATE_DISCONNECTED 1
-)
-FetchContent_MakeAvailable(cl11-download)
-add_library(CLI11 INTERFACE)
-target_include_directories(CLI11 INTERFACE "${cl11-download_SOURCE_DIR}")
+if(NOT BUILD_GUI)
+    FetchContent_Declare(
+        cl11-download
+        URL                 https://github.com/CLIUtils/CLI11/releases/download/v2.4.2/CLI11.hpp
+        URL_MD5             d7923d1ca06d03e2299e55cad532d126
+        DOWNLOAD_NO_EXTRACT 1
+        UPDATE_DISCONNECTED 1
+    )
+    FetchContent_MakeAvailable(cl11-download)
+    add_library(CLI11 INTERFACE)
+    target_include_directories(CLI11 INTERFACE "${cl11-download_SOURCE_DIR}")
+endif()
 
 FetchContent_Declare(
     pathfind-download

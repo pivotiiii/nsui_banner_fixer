@@ -194,7 +194,7 @@ async function checkRequirements(repeat = false) {
             "Missing required files!<br><br class=\"smaller\">"
             + missing_files_string
             + "<br><br class=\"smaller\">"
-            + "Please extract the 'tools' folder that was included in the downloaded .zip file and place it next to nsui_banner_fixer.exe.";
+            + "Please make sure you are running nsui_banner_fixer.exe in a directory in which you have write access. (e.g. outside of Program Files)";
         ui.addBtn.disabled = true;
         ui.addBtn.classList.remove("app-btn-primary");
         ui.missingReqsAlert.classList.add("show");

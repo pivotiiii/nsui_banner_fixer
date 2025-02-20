@@ -6,6 +6,7 @@
 #define NOMINMAX
 #include "Windows.h"
 #undef interface
+#include "tools.rc"
 #endif
 
 #ifdef GUI
@@ -24,22 +25,14 @@
 #include "Game.hpp"
 #include "Settings.hpp"
 
-#ifndef VERSION
-#define VERSION "0.0.0"
-#endif
-#ifndef YEAR
-#define YEAR "0000"
-#endif
-#ifndef COMPILE_TIME
-#define COMPILE_TIME "0000-00-00 00:00:00 UTC"
-#endif
-
 namespace fs = std::filesystem;
 
 #ifdef _WIN32
-typedef struct Codepage_Manager {
+class Codepage_Manager {
+  private:
     UINT old_page;
 
+  public:
     Codepage_Manager()
     {
         this->old_page = GetConsoleOutputCP();
@@ -49,8 +42,60 @@ typedef struct Codepage_Manager {
     {
         SetConsoleOutputCP(this->old_page);
     };
-} Codepage_Manager;
+};
+
+class Resource_Manager {
+  private:
+    fs::path tools_dir;
+
+  public:
+    Resource_Manager(Settings &set)
+    {
+        const int tools_res_ids[3] = {DSTOOL, CTRTOOL, MAKEROM};
+        const std::string tools_res_file[3] = {"3dstool.exe", "ctrtool.exe", "makerom.exe"};
+        fs::path* tool_paths_settings[3] = {&set.dstool, &set.ctrtool, &set.makerom};
+
+        this->tools_dir = set.cwd / "tools_nbf_temp";
+        fs::create_directories(this->tools_dir);
+
+        for (int i = 0; i < 3; i++) {
+            HRSRC hResource = FindResource(nullptr, MAKEINTRESOURCE(tools_res_ids[i]), RT_RCDATA);
+            if (hResource == NULL) {
+                std::cerr << "ERROR: " << tools_res_file[i] << " resource can't be found!\n";
+                continue;
+            }
+            HGLOBAL hGlobal = LoadResource(NULL, hResource);
+            if (hGlobal == NULL) {
+                std::cerr << "ERROR: " << tools_res_file[i] << " resource can't be loaded!\n";
+                continue;
+            }
+            DWORD exeSize = SizeofResource(NULL, hResource);
+            if (exeSize == 0) {
+                std::cerr << "ERROR: " << tools_res_file[i] << " resource size is 0!\n";
+                continue;
+            }
+            void* exeBuf = LockResource(hGlobal);
+            if (exeBuf == NULL) {
+                std::cerr << "ERROR: " << tools_res_file[i] << " resource can't be locked!\n";
+                continue;
+            }
+            std::ofstream ofs((this->tools_dir / tools_res_file[i]).string().c_str(), std::ios::binary);
+            if (!ofs.is_open()) {
+                std::cerr << "ERROR: " << tools_res_file[i] << " can't be created!\n";
+                continue;
+            }
+            ofs.write((char*) exeBuf, exeSize);
+            ofs.close();
+            *tool_paths_settings[i] = this->tools_dir / tools_res_file[i];
+        }
+    }
+    ~Resource_Manager()
+    {
+        fs::remove_all(this->tools_dir);
+    }
+};
 #endif
+
 #if defined(_WIN32) && !defined(GUI)
 bool check_requirements(std::vector<fs::path> reqs)
 {
@@ -90,31 +135,28 @@ int WINAPI WinMain(HINSTANCE hInt, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCm
 int main(int argc, char* argv[])
 {
 #endif
+
 #ifdef _WIN32
-    Codepage_Manager man;
+    static Codepage_Manager man;
 #endif
 
     Settings set;
     set.bin = PathFind::FindExecutable();
-    set.cwd = fs::current_path();
-    set.out = fs::current_path() / "out";
+    set.cwd = fs::current_path();         // maybe a proper temp dir would be better
+    set.out = fs::current_path() / "out"; // only used outside of GUI
 
 #ifdef _WIN32
-    set.dstool = set.bin.parent_path() / "tools" / "3dstool.exe";
-    set.ctrtool = set.bin.parent_path() / "tools" / "ctrtool.exe";
-    set.makerom = set.bin.parent_path() / "tools" / "makerom.exe";
-#ifndef GUI
-    if (!check_requirements(std::vector<fs::path> {set.dstool, set.ctrtool, set.makerom})) {
-        std::cerr << "ERROR: requirements are missing!\n";
-        return 1;
-    }
-#endif
+    static Resource_Manager res(set); // static to ensure the destructor is called after the program has finished
 #endif
 
 #ifdef GUI
     UI a(set);
     return 0;
 #else
+    if (!check_requirements(std::vector<fs::path> {set.dstool, set.ctrtool, set.makerom})) {
+        std::cerr << "ERROR: requirements are missing!\n";
+        return 1;
+    }
     std::vector<fs::path> cia_paths;
 
     int parse_args_return = parse_args(argc, argv, cia_paths, set);
